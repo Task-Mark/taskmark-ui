@@ -35,11 +35,19 @@ const ICONS: Record<
 
 /** Traffic-light reading of today's pace against the 30-day peak. */
 const ICON_COLOR: Record<WorklogPaceIcon, string> = {
-  sing: "text-slate-400",
+  sing: "text-slate-500",
   smile: "text-sky-500",
   happy: "text-green-500",
   annoyed: "text-yellow-500",
   flame: "text-red-500",
+}
+
+const ICON_DISC: Record<WorklogPaceIcon, string> = {
+  sing: "bg-slate-100 ring-slate-200",
+  smile: "bg-sky-100 ring-sky-200",
+  happy: "bg-green-100 ring-green-200",
+  annoyed: "bg-yellow-100 ring-yellow-200",
+  flame: "bg-red-100 ring-red-200",
 }
 
 export function WorklogSpeedometer({
@@ -89,16 +97,20 @@ export function WorklogSpeedometer({
             inactiveFill="#EADFFE"
             inactiveFillOpacity={0.55}
           />
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center pt-2">
-            <Icon
-              aria-hidden
-              stroke={2.25}
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center pt-1">
+            <div
               className={cn(
-                "size-16 drop-shadow-sm",
-                ICON_COLOR[icon],
+                "flex size-24 items-center justify-center rounded-full ring-2",
+                ICON_DISC[icon],
                 bounce && "animate-bounce",
               )}
-            />
+            >
+              <Icon
+                aria-hidden
+                stroke={2.25}
+                className={cn("size-20", ICON_COLOR[icon])}
+              />
+            </div>
             <span className="mt-1 font-head text-2xl leading-none tabular-nums">
               {pace.today}
             </span>
