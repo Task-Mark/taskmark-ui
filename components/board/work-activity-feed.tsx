@@ -94,9 +94,15 @@ function isUsableEvent(value: WorkActivityEvent): boolean {
 
 export function WorkActivityFeed({
   events,
+  ready = true,
   className,
 }: {
   events: readonly WorkActivityEvent[]
+  /**
+   * False until the caller has fetched once. The first fetched batch seeds the
+   * feed silently, so a page load or refresh never replays existing messages.
+   */
+  ready?: boolean
   className?: string
 }) {
   const [visible, setVisible] = React.useState<WorkActivityEvent[]>([])
@@ -110,7 +116,7 @@ export function WorkActivityFeed({
     )
     for (const event of incoming) announcedIds.current.add(event.id)
     if (!seeded.current) {
-      seeded.current = true
+      if (ready) seeded.current = true
     } else if (newcomers.length > 0) {
       for (let index = 0; index < newcomers.length; index += 1) {
         window.setTimeout(() => {
@@ -126,7 +132,7 @@ export function WorkActivityFeed({
         .sort((a, b) => (receivedTime(a) ?? 0) - (receivedTime(b) ?? 0))
         .slice(-WORK_ACTIVITY_MAX_VISIBLE)
     })
-  }, [events])
+  }, [events, ready])
 
   if (visible.length === 0) return null
 
