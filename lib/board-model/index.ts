@@ -13,3 +13,10 @@ export {
   flattenWorklogEntries,
   type WorklogEntry,
 } from "./worklog"
+export {
+  WORKLOG_PACE_LOOKBACK_DAYS,
+  dailyWorklogPace,
+  worklogPaceIcon,
+  type WorklogPace,
+  type WorklogPaceIcon,
+} from "./worklog-pace"
