@@ -115,12 +115,14 @@ export function WorklogSpeedometer({
       )}
     >
       <div className="rounded-lg border-2 border-border bg-card/95 p-3 shadow-md">
-        <div className="relative">
+        {/* The arc scales on its own aspect ratio, so the wrapper must not pin
+            a height or the centered glyph and caption drift onto the track. */}
+        <div className="relative mx-auto w-full max-w-[16rem]">
           <Gauge
-            className="h-52 w-full"
+            className="w-full"
             orientation="arc"
             value={pace.fill}
-            minWidth={240}
+            minWidth={0}
             totalNotches={28}
             spacing={20}
             uniformWidth
@@ -137,7 +139,7 @@ export function WorklogSpeedometer({
             </span>
           </div>
         </div>
-        <p className="mt-1 text-center text-xs font-medium text-muted-foreground">
+        <p className="mt-2 text-center text-xs font-medium text-muted-foreground">
           Work logs today vs 30-day peak ({pace.peak})
         </p>
         <div
