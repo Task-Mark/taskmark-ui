@@ -12,4 +12,4 @@ export type WorkActivityEvent = {
   receivedAt: string
 }
 
-export const WORK_ACTIVITY_MAX_VISIBLE = 6
+export const WORK_ACTIVITY_MAX_VISIBLE = 5
