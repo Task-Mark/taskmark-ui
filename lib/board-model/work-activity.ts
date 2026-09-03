@@ -12,5 +12,4 @@ export type WorkActivityEvent = {
   receivedAt: string
 }
 
-export const WORK_ACTIVITY_TTL_MS = 5 * 60 * 1000
 export const WORK_ACTIVITY_MAX_VISIBLE = 6

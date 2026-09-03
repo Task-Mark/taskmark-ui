@@ -36,7 +36,6 @@ import {
 } from "../../lib/board-model/identity"
 import {
   WORK_ACTIVITY_MAX_VISIBLE,
-  WORK_ACTIVITY_TTL_MS,
   type WorkActivityEvent,
 } from "../../lib/board-model/work-activity"
 import { typeBadgeClass } from "./status-badge"
@@ -100,23 +99,12 @@ export function WorkActivityFeed({
   events: readonly WorkActivityEvent[]
   className?: string
 }) {
-  const [now, setNow] = React.useState(() => Date.now())
-  const [feed, setFeed] = React.useState<{
-    visible: WorkActivityEvent[]
-    seen: Map<string, number>
-  }>(() => ({ visible: [], seen: new Map() }))
-  const visible = feed.visible
+  const [visible, setVisible] = React.useState<WorkActivityEvent[]>([])
   const seeded = React.useRef(false)
   const announcedIds = React.useRef(new Set<string>())
 
   React.useEffect(() => {
-    const current = Date.now()
-    setNow(current)
-    const incoming = (Array.isArray(events) ? events : []).filter(
-      (event) =>
-        isUsableEvent(event) &&
-        current - receivedTime(event)! < WORK_ACTIVITY_TTL_MS,
-    )
+    const incoming = (Array.isArray(events) ? events : []).filter(isUsableEvent)
     const newcomers = incoming.filter(
       (event) => !announcedIds.current.has(event.id),
     )
@@ -130,68 +118,15 @@ export function WorkActivityFeed({
         }, index * 90)
       }
     }
-    setFeed((previous) => {
-      const seen = new Map(
-        Array.from(previous.seen).filter(
-          ([, received]) => current - received < WORK_ACTIVITY_TTL_MS
-        )
-      )
+    setVisible((previous) => {
       const merged = new Map<string, WorkActivityEvent>()
-      for (const event of previous.visible) {
-        const received = receivedTime(event)
-        if (received != null && current - received < WORK_ACTIVITY_TTL_MS) {
-          merged.set(event.id, event)
-          seen.set(event.id, received)
-        }
-      }
-      for (const event of Array.isArray(events) ? events : []) {
-        if (!isUsableEvent(event)) continue
-        const received = receivedTime(event)!
-        if (current - received >= WORK_ACTIVITY_TTL_MS) continue
-        if (seen.has(event.id)) {
-          if (merged.has(event.id)) merged.set(event.id, event)
-        } else {
-          seen.set(event.id, received)
-          merged.set(event.id, event)
-        }
-      }
-      return {
-        visible: Array.from(merged.values())
-          .sort(
-            (a, b) =>
-              (receivedTime(a) ?? 0) - (receivedTime(b) ?? 0)
-          )
-          .slice(-WORK_ACTIVITY_MAX_VISIBLE),
-        seen,
-      }
+      for (const event of previous) merged.set(event.id, event)
+      for (const event of incoming) merged.set(event.id, event)
+      return Array.from(merged.values())
+        .sort((a, b) => (receivedTime(a) ?? 0) - (receivedTime(b) ?? 0))
+        .slice(-WORK_ACTIVITY_MAX_VISIBLE)
     })
   }, [events])
-
-  React.useEffect(() => {
-    if (visible.length === 0) return
-    const nextExpiry = Math.min(
-      ...visible.map(
-        (event) => (receivedTime(event) ?? now) + WORK_ACTIVITY_TTL_MS
-      )
-    )
-    const delay = Math.max(50, Math.min(30_000, nextExpiry - Date.now()))
-    const timer = window.setTimeout(() => {
-      const current = Date.now()
-      setNow(current)
-      setFeed((currentFeed) => ({
-        visible: currentFeed.visible.filter((event) => {
-          const received = receivedTime(event)
-          return received != null && current - received < WORK_ACTIVITY_TTL_MS
-        }),
-        seen: new Map(
-          Array.from(currentFeed.seen).filter(
-            ([, received]) => current - received < WORK_ACTIVITY_TTL_MS
-          )
-        ),
-      }))
-    }, delay)
-    return () => window.clearTimeout(timer)
-  }, [visible, now])
 
   if (visible.length === 0) return null
 
@@ -237,6 +172,7 @@ export function WorkActivityFeed({
                     itemId={event.itemId}
                     itemTitle={event.itemTitle}
                   />
+                  <p className="mt-2 text-muted-foreground">{event.summary}</p>
                 </BubbleContent>
               </Bubble>
               <MessageFooter>
