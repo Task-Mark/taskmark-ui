@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 import { Tabs, TabsList, TabsTrigger } from "@taskmark/components/ui/tabs"
 import {
@@ -27,6 +27,7 @@ function ListViewSwitcherInner({
   hasReports = false,
 }: ListViewSwitcherProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const itemId = searchParams.get("item")
   const modes = listViewModes({ hasChangelog, hasReports })
@@ -37,14 +38,13 @@ function ListViewSwitcherInner({
       onValueChange={(value) => {
         if (typeof value !== "string") return
         const next = value as ListViewMode
-        router.push(
-          boardHref({
-            view: next,
-            epic: next === "overall" ? selectedEpicId : null,
-            story: next === "overall" ? selectedStoryId : null,
-            item: itemId,
-          })
-        )
+        const href = boardHref({
+          view: next,
+          epic: next === "overall" ? selectedEpicId : null,
+          story: next === "overall" ? selectedStoryId : null,
+          item: itemId,
+        })
+        router.push(pathname === "/" ? href : `${pathname}${href.slice(1)}`)
       }}
     >
       <TabsList aria-label="Board list view">

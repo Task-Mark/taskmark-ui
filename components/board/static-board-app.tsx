@@ -12,7 +12,9 @@ import { ProjectStatusMetricsStrip } from "./project-status-metrics-strip"
 import { ReportsPanel } from "./reports-panel"
 import { WorkItemsList } from "./work-items-list"
 import { WorkItemSheetProvider } from "./work-item-sheet"
+import { WorklogPanel } from "./worklog-panel"
 import { HIDE_COMPLETED_DEFAULT } from "../../lib/board-model/constants"
+import { flattenWorklogEntries } from "../../lib/board-model/worklog"
 import {
   LIST_VIEW_LABELS,
   parseListViewMode,
@@ -67,6 +69,10 @@ export function StaticBoardApp({
   const countableCompletions = snapshot.countableCompletions
   const statusMetrics = snapshot.statusMetrics
   const workItemsList = snapshot.workItemsView
+  const worklogEntries = React.useMemo(
+    () => flattenWorklogEntries(snapshot.detailsByPath),
+    [snapshot.detailsByPath]
+  )
 
   const selectedEpic = selectedEpicId
     ? list.epics.find((e) => e.id === selectedEpicId) ?? null
@@ -95,6 +101,9 @@ export function StaticBoardApp({
                   : ""}
                 {activeView === "workitems"
                   ? ` · ${workItemsList.rows.length} item${workItemsList.rows.length === 1 ? "" : "s"}`
+                  : ""}
+                {activeView === "worklog"
+                  ? ` · ${worklogEntries.length} entr${worklogEntries.length === 1 ? "y" : "ies"}`
                   : ""}
                 {activeView === "overall" && selectedEpic
                   ? ` · expanded ${selectedEpic.id}`
@@ -138,6 +147,10 @@ export function StaticBoardApp({
               countableCompletions={countableCompletions}
               initialHideCompleted={hideCompleted}
             />
+          ) : null}
+
+          {activeView === "worklog" ? (
+            <WorklogPanel entries={worklogEntries} />
           ) : null}
 
           {activeView === "changelog" && changelogMarkdown ? (
