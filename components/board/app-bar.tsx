@@ -10,12 +10,18 @@ export type AppBarProps = {
   tagline?: string
   /** Controls rendered between the brand block and the theme toggle. */
   children?: React.ReactNode
+  /**
+   * Replaces every control on mobile, leaving only the brand block beside it.
+   * Without it the regular controls stay visible at every width.
+   */
+  mobileMenu?: React.ReactNode
 }
 
 export function AppBar({
   title = "Taskmark",
   tagline = "Product memory for agent work",
   children,
+  mobileMenu,
 }: AppBarProps) {
   return (
     <header className="sticky top-0 z-40 border-b-2 border-border bg-card/95 shadow-sm backdrop-blur">
@@ -51,9 +57,20 @@ export function AppBar({
           </div>
         </div>
 
-        {children}
-
-        <ThemeToggle />
+        {mobileMenu ? (
+          <>
+            <div className="hidden items-center gap-3 md:flex">
+              {children}
+              <ThemeToggle />
+            </div>
+            <div className="md:hidden">{mobileMenu}</div>
+          </>
+        ) : (
+          <>
+            {children}
+            <ThemeToggle />
+          </>
+        )}
       </div>
     </header>
   )

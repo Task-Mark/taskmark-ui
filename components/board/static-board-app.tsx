@@ -31,12 +31,15 @@ function headingForView(view: ListViewMode): string {
 export function StaticBoardApp({
   snapshot,
   actions,
+  mobileMenu,
   mobileAside,
   title = "Taskmark",
   tagline = "Product memory for agent work",
 }: {
   snapshot: BoardSnapshot
   actions?: React.ReactNode
+  /** Replaces the app bar controls on mobile. */
+  mobileMenu?: React.ReactNode
   /** Rendered in the page body only on mobile, where floating chrome is hidden. */
   mobileAside?: React.ReactNode
   title?: string
@@ -84,7 +87,7 @@ export function StaticBoardApp({
   return (
     <WorkItemSheetProvider>
       <div className="tm-surface min-h-svh">
-        <AppBar title={title} tagline={tagline}>
+        <AppBar title={title} tagline={tagline} mobileMenu={mobileMenu}>
           {actions}
         </AppBar>
 
