@@ -90,7 +90,8 @@ export function worklogPaceIcon(
   pace: Pick<WorklogPace, "today" | "peak">,
   now: Date = new Date(),
 ): WorklogPaceIcon {
-  const ratio = pace.peak > 0 ? pace.today / pace.peak : 0
+  if (pace.peak <= 0) return "sing"
+  const ratio = pace.today / pace.peak
   const endOfDay = now.getHours() >= WORKLOG_PACE_FLAME_HOUR
   if (endOfDay && ratio >= WORKLOG_PACE_FLAME_RATIO) return "flame"
   if (endOfDay && ratio < WORKLOG_PACE_ANNOYED_RATIO) return "annoyed"
@@ -99,7 +100,11 @@ export function worklogPaceIcon(
   return "smile"
 }
 
-/** Oldest → newest, including today. Past days use end-of-day icon rules. */
+/**
+ * Oldest → newest, including today. Each day is scored against the peak known
+ * on that day (its own trailing lookback window), never against later records.
+ * Past days use end-of-day icon rules.
+ */
 export function dailyWorklogHistory(
   entries: readonly Pick<WorklogEntry, "started">[],
   now: Date = new Date(),
@@ -107,16 +112,23 @@ export function dailyWorklogHistory(
   lookbackDays: number = WORKLOG_PACE_LOOKBACK_DAYS,
 ): WorklogPaceDay[] {
   const todayKey = localDayKey(now)
-  const peakDays = localNoonDays(now, lookbackDays)
-  const historyDaysList = localNoonDays(now, historyDays)
-  const windowKeys = new Set(peakDays.map(localDayKey))
-  const counts = countByDay(entries, windowKeys)
-  const peak = peakOf(counts)
+  // Every history day needs its own trailing lookback window, so the counted
+  // span reaches back beyond the oldest shown day.
+  const spanDays = localNoonDays(now, lookbackDays + historyDays - 1)
+  const spanKeys = spanDays.map(localDayKey)
+  const counts = countByDay(entries, new Set(spanKeys))
   const endOfDay = new Date(now)
   endOfDay.setHours(WORKLOG_PACE_FLAME_HOUR, 0, 0, 0)
 
-  return historyDaysList.map((day) => {
-    const key = localDayKey(day)
+  const historyStart = spanKeys.length - historyDays
+  return spanKeys.slice(historyStart).map((key, index) => {
+    const endIndex = historyStart + index
+    const startIndex = Math.max(0, endIndex - lookbackDays + 1)
+    let peak = 0
+    for (let i = startIndex; i <= endIndex; i += 1) {
+      const count = counts.get(spanKeys[i]) ?? 0
+      if (count > peak) peak = count
+    }
     const count = counts.get(key) ?? 0
     const at = key === todayKey ? now : endOfDay
     return {
