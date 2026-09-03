@@ -31,11 +31,14 @@ function headingForView(view: ListViewMode): string {
 export function StaticBoardApp({
   snapshot,
   actions,
+  mobileAside,
   title = "Taskmark",
   tagline = "Product memory for agent work",
 }: {
   snapshot: BoardSnapshot
   actions?: React.ReactNode
+  /** Rendered in the page body only on mobile, where floating chrome is hidden. */
+  mobileAside?: React.ReactNode
   title?: string
   tagline?: string
 }) {
@@ -125,6 +128,8 @@ export function StaticBoardApp({
           </div>
 
           <ProjectStatusMetricsStrip metrics={statusMetrics} />
+
+          {mobileAside ? <div className="md:hidden">{mobileAside}</div> : null}
 
           {activeView === "overall" ? (
             <>

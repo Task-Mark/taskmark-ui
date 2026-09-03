@@ -135,7 +135,7 @@ export function WorkActivityFeed({
       aria-label="Recent work activity"
       aria-live="polite"
       className={cn(
-        "pointer-events-auto fixed right-4 bottom-4 z-50 w-[min(24rem,calc(100vw-2rem))]",
+        "pointer-events-auto fixed right-4 bottom-4 z-50 hidden w-[min(24rem,calc(100vw-2rem))] md:flex",
         className
       )}
     >

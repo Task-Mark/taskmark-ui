@@ -78,9 +78,12 @@ function PaceGlyph({
 
 export function WorklogSpeedometer({
   entries,
+  layout = "floating",
   className,
 }: {
   entries: readonly WorklogEntry[]
+  /** Floating stays out of the page flow and is hidden on mobile. */
+  layout?: "floating" | "inline"
   className?: string
 }) {
   const [now, setNow] = React.useState(() => new Date())
@@ -105,7 +108,9 @@ export function WorklogSpeedometer({
     <div
       aria-label={`Today ${pace.today} work logs, peak ${pace.peak} in the last 30 days`}
       className={cn(
-        "pointer-events-none fixed bottom-4 left-4 z-50 w-[18rem]",
+        layout === "floating"
+          ? "pointer-events-none fixed bottom-4 left-4 z-50 hidden w-[18rem] md:block"
+          : "w-full",
         className,
       )}
     >
