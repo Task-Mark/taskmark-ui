@@ -12,6 +12,7 @@ import {
 import { Gauge } from "../charts/gauge"
 import { cn } from "../../lib/utils"
 import {
+  dailyWorklogHistory,
   dailyWorklogPace,
   worklogPaceIcon,
   type WorklogPaceIcon,
@@ -50,6 +51,31 @@ const ICON_DISC: Record<WorklogPaceIcon, string> = {
   flame: "bg-red-100 ring-red-200",
 }
 
+function PaceGlyph({
+  icon,
+  bounce,
+}: {
+  icon: WorklogPaceIcon
+  bounce?: boolean
+}) {
+  const Icon = ICONS[icon]
+  return (
+    <div
+      className={cn(
+        "flex size-16 items-center justify-center rounded-full ring-2",
+        ICON_DISC[icon],
+        bounce && "animate-bounce",
+      )}
+    >
+      <Icon
+        aria-hidden
+        stroke={2.25}
+        className={cn("size-12", ICON_COLOR[icon])}
+      />
+    </div>
+  )
+}
+
 export function WorklogSpeedometer({
   entries,
   className,
@@ -68,13 +94,15 @@ export function WorklogSpeedometer({
     () => dailyWorklogPace(entries, now),
     [entries, now],
   )
+  const history = React.useMemo(
+    () => dailyWorklogHistory(entries, now),
+    [entries, now],
+  )
   const icon = worklogPaceIcon(pace, now)
-  const Icon = ICONS[icon]
   const bounce = icon === "happy" || icon === "flame"
 
   return (
     <div
-      role="img"
       aria-label={`Today ${pace.today} work logs, peak ${pace.peak} in the last 30 days`}
       className={cn(
         "pointer-events-none fixed bottom-4 left-4 z-50 w-[18rem]",
@@ -98,19 +126,7 @@ export function WorklogSpeedometer({
             inactiveFillOpacity={0.55}
           />
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center pt-1">
-            <div
-              className={cn(
-                "flex size-24 items-center justify-center rounded-full ring-2",
-                ICON_DISC[icon],
-                bounce && "animate-bounce",
-              )}
-            >
-              <Icon
-                aria-hidden
-                stroke={2.25}
-                className={cn("size-20", ICON_COLOR[icon])}
-              />
-            </div>
+            <PaceGlyph bounce={bounce} icon={icon} />
             <span className="mt-1 font-head text-2xl leading-none tabular-nums">
               {pace.today}
             </span>
@@ -119,6 +135,30 @@ export function WorklogSpeedometer({
         <p className="mt-1 text-center text-xs font-medium text-muted-foreground">
           Work logs today vs 30-day peak ({pace.peak})
         </p>
+        <div
+          aria-label="Last 10 days"
+          className="pointer-events-auto mt-2 flex items-center justify-between gap-0.5"
+        >
+          {history.map((day) => {
+            const DayIcon = ICONS[day.icon]
+            return (
+              <span
+                key={day.day}
+                title={`${day.day}: ${day.count} work logs`}
+                className={cn(
+                  "flex size-6 items-center justify-center rounded-full ring-1",
+                  ICON_DISC[day.icon],
+                )}
+              >
+                <DayIcon
+                  aria-hidden
+                  stroke={2}
+                  className={cn("size-4", ICON_COLOR[day.icon])}
+                />
+              </span>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

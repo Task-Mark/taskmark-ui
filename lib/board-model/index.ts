@@ -14,9 +14,12 @@ export {
   type WorklogEntry,
 } from "./worklog"
 export {
+  WORKLOG_PACE_HISTORY_DAYS,
   WORKLOG_PACE_LOOKBACK_DAYS,
+  dailyWorklogHistory,
   dailyWorklogPace,
   worklogPaceIcon,
   type WorklogPace,
+  type WorklogPaceDay,
   type WorklogPaceIcon,
 } from "./worklog-pace"
