@@ -2,11 +2,11 @@
 
 import * as React from "react"
 import {
-  IconFlame,
+  IconFlameFilled,
   IconMoodAnnoyed,
-  IconMoodHappy,
+  IconMoodHappyFilled,
   IconMoodSing,
-  IconMoodSmile,
+  IconMoodSmileFilled,
 } from "@tabler/icons-react"
 
 import { Gauge } from "../charts/gauge"
@@ -20,17 +20,22 @@ import type { WorklogEntry } from "../../lib/board-model/worklog"
 
 const ICONS: Record<
   WorklogPaceIcon,
-  React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>
+  React.ComponentType<{
+    className?: string
+    stroke?: number
+    "aria-hidden"?: boolean
+  }>
 > = {
   sing: IconMoodSing,
-  smile: IconMoodSmile,
-  happy: IconMoodHappy,
+  smile: IconMoodSmileFilled,
+  happy: IconMoodHappyFilled,
   annoyed: IconMoodAnnoyed,
-  flame: IconFlame,
+  flame: IconFlameFilled,
 }
 
+/** Traffic-light reading of today's pace against the 30-day peak. */
 const ICON_COLOR: Record<WorklogPaceIcon, string> = {
-  sing: "text-muted-foreground",
+  sing: "text-slate-400",
   smile: "text-sky-500",
   happy: "text-green-500",
   annoyed: "text-yellow-500",
@@ -87,8 +92,9 @@ export function WorklogSpeedometer({
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center pt-2">
             <Icon
               aria-hidden
+              stroke={2.25}
               className={cn(
-                "size-12",
+                "size-16 drop-shadow-sm",
                 ICON_COLOR[icon],
                 bounce && "animate-bounce",
               )}
