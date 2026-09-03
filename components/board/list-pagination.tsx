@@ -22,6 +22,7 @@ type ListPaginationProps = {
   pageSize: PageSize
   onPageChange: (page: number) => void
   onPageSizeChange: (pageSize: PageSize) => void
+  showPageSize?: boolean
   className?: string
 }
 
@@ -32,6 +33,7 @@ export function ListPagination({
   pageSize,
   onPageChange,
   onPageSizeChange,
+  showPageSize = true,
   className,
 }: ListPaginationProps) {
   if (totalCount === 0) return null
@@ -56,25 +58,27 @@ export function ListPagination({
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-1.5">
-          <Label htmlFor="list-page-size" className="text-xs text-muted-foreground">
-            Rows
-          </Label>
-          <select
-            id="list-page-size"
-            className="h-8 rounded border-2 border-border bg-input px-2 text-sm shadow-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            value={pageSize}
-            onChange={(e) =>
-              onPageSizeChange(Number(e.target.value) as PageSize)
-            }
-          >
-            {PAGE_SIZE_OPTIONS.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
-        </div>
+        {showPageSize ? (
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="list-page-size" className="text-xs text-muted-foreground">
+              Rows
+            </Label>
+            <select
+              id="list-page-size"
+              className="h-8 rounded border-2 border-border bg-input px-2 text-sm shadow-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              value={pageSize}
+              onChange={(e) =>
+                onPageSizeChange(Number(e.target.value) as PageSize)
+              }
+            >
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
 
         <nav aria-label="Pagination" className="flex items-center gap-0.5">
           <Button

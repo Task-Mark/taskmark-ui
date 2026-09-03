@@ -19,6 +19,13 @@ import {
   MessageGroup,
   MessageHeader,
 } from "@taskmark/components/ui/message"
+import { Badge } from "@taskmark/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@taskmark/components/ui/tooltip"
 import { cn } from "../../lib/utils"
 import { formatTaskmarkDateTime } from "../../lib/format-date"
 import { bong001Sound } from "../../lib/bong-001"
@@ -32,6 +39,43 @@ import {
   WORK_ACTIVITY_TTL_MS,
   type WorkActivityEvent,
 } from "../../lib/board-model/work-activity"
+import { typeBadgeClass } from "./status-badge"
+
+function itemKindFromId(id: string): "epic" | "story" | "task" | "bug" {
+  if (id.startsWith("B-")) return "bug"
+  if (id.startsWith("E-")) return "epic"
+  if (id.startsWith("S-")) return "story"
+  return "task"
+}
+
+function FeedItemTag({
+  itemId,
+  itemTitle,
+}: {
+  itemId: string
+  itemTitle: string
+}) {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Badge
+              variant="outline"
+              className={cn(
+                "cursor-default font-mono text-xs",
+                typeBadgeClass(itemKindFromId(itemId)),
+              )}
+            />
+          }
+        >
+          {itemId || "—"}
+        </TooltipTrigger>
+        <TooltipContent>{itemTitle || itemId || "Untitled"}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
 
 function receivedTime(event: WorkActivityEvent): number | null {
   const value = Date.parse(event.receivedAt)
@@ -156,7 +200,7 @@ export function WorkActivityFeed({
       aria-label="Recent work activity"
       aria-live="polite"
       className={cn(
-        "pointer-events-none fixed right-4 bottom-4 z-50 w-[min(24rem,calc(100vw-2rem))]",
+        "pointer-events-auto fixed right-4 bottom-4 z-50 w-[min(24rem,calc(100vw-2rem))]",
         className
       )}
     >
@@ -169,9 +213,9 @@ export function WorkActivityFeed({
           initials,
         })
         return (
-          <Message key={event.id} className="items-end">
-            <MessageAvatar>
-              <Avatar aria-hidden="true">
+          <Message key={event.id} className="items-start">
+            <MessageAvatar className="self-start translate-y-0 group-has-data-[slot=message-footer]/message:translate-y-0">
+              <Avatar size="lg" aria-hidden="true">
                 <AvatarFallback
                   className="font-semibold tracking-wide text-white"
                   style={{ backgroundColor: color }}
@@ -189,13 +233,10 @@ export function WorkActivityFeed({
               </MessageHeader>
               <Bubble variant="outline" className="max-w-full">
                 <BubbleContent className="w-full border-2 bg-card shadow-md">
-                  <div className="font-medium">
-                    {event.itemTitle || "Untitled"}{" "}
-                    <span className="text-muted-foreground">
-                      {event.itemId}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-muted-foreground">{event.summary}</p>
+                  <FeedItemTag
+                    itemId={event.itemId}
+                    itemTitle={event.itemTitle}
+                  />
                 </BubbleContent>
               </Bubble>
               <MessageFooter>
