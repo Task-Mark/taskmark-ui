@@ -13,7 +13,7 @@ export type WorklogPace = {
   fill: number
 }
 
-export type WorklogPaceIcon = "sing" | "smile" | "happy" | "annoyed" | "flame"
+export type WorklogPaceIcon = "zzz" | "smile" | "happy" | "annoyed" | "flame"
 
 export type WorklogPaceDay = {
   day: string
@@ -90,12 +90,12 @@ export function worklogPaceIcon(
   pace: Pick<WorklogPace, "today" | "peak">,
   now: Date = new Date(),
 ): WorklogPaceIcon {
-  if (pace.peak <= 0) return "sing"
+  if (pace.peak <= 0) return "zzz"
   const ratio = pace.today / pace.peak
   const endOfDay = now.getHours() >= WORKLOG_PACE_FLAME_HOUR
   if (endOfDay && ratio >= WORKLOG_PACE_FLAME_RATIO) return "flame"
   if (endOfDay && ratio < WORKLOG_PACE_ANNOYED_RATIO) return "annoyed"
-  if (pace.today <= 0) return "sing"
+  if (pace.today <= 0) return "zzz"
   if (ratio >= WORKLOG_PACE_HAPPY_RATIO) return "happy"
   return "smile"
 }

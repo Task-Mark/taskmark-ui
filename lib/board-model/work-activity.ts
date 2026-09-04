@@ -12,4 +12,12 @@ export type WorkActivityEvent = {
   receivedAt: string
 }
 
+export type WorkPresenceCard = {
+  id: string
+  actor: string
+  summary: string
+  generatedAt: string
+  sourceEventIds?: readonly string[]
+}
+
 export const WORK_ACTIVITY_MAX_VISIBLE = 5

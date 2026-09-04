@@ -8,6 +8,7 @@ export type { WorkItemDetail, WorkItemRef } from "./detail-types"
 export {
   WORK_ACTIVITY_MAX_VISIBLE,
   type WorkActivityEvent,
+  type WorkPresenceCard,
 } from "./work-activity"
 export {
   flattenWorklogEntries,

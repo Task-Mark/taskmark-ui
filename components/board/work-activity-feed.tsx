@@ -4,16 +4,11 @@ import * as React from "react"
 import { formatDistanceToNow } from "date-fns"
 
 import {
-  Avatar,
-  AvatarFallback,
-} from "@taskmark/components/ui/avatar"
-import {
   Bubble,
   BubbleContent,
 } from "@taskmark/components/ui/bubble"
 import {
   Message,
-  MessageAvatar,
   MessageContent,
   MessageFooter,
   MessageGroup,
@@ -31,13 +26,10 @@ import { formatTaskmarkDateTime } from "../../lib/format-date"
 import { bong001Sound } from "../../lib/bong-001"
 import { playSound } from "../../lib/sound-engine"
 import {
-  deriveInitials,
-  identityBackgroundColor,
-} from "../../lib/board-model/identity"
-import {
   WORK_ACTIVITY_MAX_VISIBLE,
   type WorkActivityEvent,
 } from "../../lib/board-model/work-activity"
+import { ActorAvatar } from "./actor-avatar"
 import { typeBadgeClass } from "./status-badge"
 
 function itemKindFromId(id: string): "epic" | "story" | "task" | "bug" {
@@ -147,24 +139,9 @@ export function WorkActivityFeed({
     >
       {visible.map((event) => {
         const received = new Date(receivedTime(event)!)
-        const initials = deriveInitials(event.actor)
-        const color = identityBackgroundColor({
-          name: event.actor,
-          email: "",
-          initials,
-        })
         return (
           <Message key={event.id} className="items-start">
-            <MessageAvatar className="self-start translate-y-0 group-has-data-[slot=message-footer]/message:translate-y-0">
-              <Avatar size="lg" aria-hidden="true">
-                <AvatarFallback
-                  className="font-semibold tracking-wide text-white"
-                  style={{ backgroundColor: color }}
-                >
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-            </MessageAvatar>
+            <ActorAvatar actor={event.actor} />
             <MessageContent className="gap-1">
               <MessageHeader className="justify-between gap-3">
                 <span className="truncate">{event.actor || "Unknown actor"}</span>

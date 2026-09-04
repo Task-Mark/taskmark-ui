@@ -5,7 +5,7 @@ import {
   IconFlameFilled,
   IconMoodAnnoyed,
   IconMoodHappyFilled,
-  IconMoodSing,
+  IconZzz,
   IconMoodSmileFilled,
 } from "@tabler/icons-react"
 
@@ -27,7 +27,7 @@ const ICONS: Record<
     "aria-hidden"?: boolean
   }>
 > = {
-  sing: IconMoodSing,
+  zzz: IconZzz,
   smile: IconMoodSmileFilled,
   happy: IconMoodHappyFilled,
   annoyed: IconMoodAnnoyed,
@@ -36,7 +36,7 @@ const ICONS: Record<
 
 /** Traffic-light reading of today's pace against the 30-day peak. */
 const ICON_COLOR: Record<WorklogPaceIcon, string> = {
-  sing: "text-slate-500",
+  zzz: "text-slate-500",
   smile: "text-sky-500",
   happy: "text-green-500",
   annoyed: "text-yellow-500",
@@ -44,7 +44,7 @@ const ICON_COLOR: Record<WorklogPaceIcon, string> = {
 }
 
 const ICON_DISC: Record<WorklogPaceIcon, string> = {
-  sing: "bg-slate-100 ring-slate-200",
+  zzz: "bg-slate-100 ring-slate-200",
   smile: "bg-sky-100 ring-sky-200",
   happy: "bg-green-100 ring-green-200",
   annoyed: "bg-yellow-100 ring-yellow-200",
