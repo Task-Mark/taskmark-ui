@@ -18,7 +18,9 @@
     "./ui/*": "./components/ui/*.tsx",
     "./charts/*": "./components/charts/*.tsx",
     "./board": "./components/board/index.ts",
+    "./board/worklog-panel": "./components/board/worklog-panel.tsx",
     "./board-model": "./lib/board-model/index.ts",
+    "./board-model/worklog": "./lib/board-model/worklog.ts",
     "./theme": "./lib/theme.ts",
     "./theme.css": "./styles/theme.css",
     "./style": "./styles/theme.css"
