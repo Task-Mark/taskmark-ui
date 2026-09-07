@@ -91,11 +91,13 @@ export function worklogPaceIcon(
   now: Date = new Date(),
 ): WorklogPaceIcon {
   if (pace.peak <= 0) return "zzz"
+  // A day with no work at all sleeps; annoyed is only for a day that fell
+  // short of the peak, never for one that never started.
+  if (pace.today <= 0) return "zzz"
   const ratio = pace.today / pace.peak
   const endOfDay = now.getHours() >= WORKLOG_PACE_FLAME_HOUR
   if (endOfDay && ratio >= WORKLOG_PACE_FLAME_RATIO) return "flame"
   if (endOfDay && ratio < WORKLOG_PACE_ANNOYED_RATIO) return "annoyed"
-  if (pace.today <= 0) return "zzz"
   if (ratio >= WORKLOG_PACE_HAPPY_RATIO) return "happy"
   return "smile"
 }

@@ -16,6 +16,8 @@ export type WorkPresenceCard = {
   id: string
   actor: string
   summary: string
+  /** Complete summary shown when the compact card is opened. */
+  fullSummary?: string
   generatedAt: string
   sourceEventIds?: readonly string[]
 }

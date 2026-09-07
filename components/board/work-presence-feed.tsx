@@ -10,6 +10,14 @@ import {
   MessageGroup,
   MessageHeader,
 } from "@taskmark/components/ui/message"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog"
 import { cn } from "../../lib/utils"
 import { bong001Sound } from "../../lib/bong-001"
 import { playSound } from "../../lib/sound-engine"
@@ -34,7 +42,7 @@ function isUsableCard(value: WorkPresenceCard): boolean {
 }
 
 function cardKey(card: WorkPresenceCard): string {
-  return `${card.actor}\0${card.summary}`
+  return `${card.actor}\0${card.summary}\0${card.fullSummary ?? ""}`
 }
 
 /**
@@ -109,11 +117,31 @@ export function WorkPresenceFeed({
                 })}
               </span>
             </MessageHeader>
-            <Bubble variant="outline" className="max-w-full">
-              <BubbleContent className="w-full border-2 bg-card shadow-md">
-                <p className="text-muted-foreground">{`“${card.summary}”`}</p>
-              </BubbleContent>
-            </Bubble>
+            <Dialog>
+              <DialogTrigger
+                render={
+                  <button
+                    type="button"
+                    aria-label={`Open full work summary for ${card.actor}`}
+                    className="block max-w-full cursor-pointer text-left"
+                  />
+                }
+              >
+                <Bubble variant="outline" className="max-w-full">
+                  <BubbleContent className="w-full border-2 bg-card shadow-md transition-colors hover:bg-muted/50">
+                    <p className="text-muted-foreground">{`“${card.summary}”`}</p>
+                  </BubbleContent>
+                </Bubble>
+              </DialogTrigger>
+              <DialogContent className="max-h-[min(80svh,48rem)] overflow-y-auto sm:max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>{card.actor}</DialogTitle>
+                  <DialogDescription className="whitespace-pre-wrap leading-relaxed">
+                    {card.fullSummary?.trim() || card.summary}
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
           </MessageContent>
         </Message>
       ))}
