@@ -23,6 +23,7 @@ import { bong001Sound } from "../../lib/bong-001"
 import { playSound } from "../../lib/sound-engine"
 import type { WorkPresenceCard } from "../../lib/board-model/work-activity"
 import { ActorAvatar } from "./actor-avatar"
+import { Spinner } from "../ui/spinner"
 
 function generatedTime(card: WorkPresenceCard): number | null {
   const value = Date.parse(card.generatedAt)
@@ -41,8 +42,21 @@ function isUsableCard(value: WorkPresenceCard): boolean {
   )
 }
 
+function actorKey(actor: string): string {
+  return actor.trim().toLocaleLowerCase() || "unknown"
+}
+
+function newestVisible(
+  left: WorkPresenceCard,
+  right: WorkPresenceCard,
+): WorkPresenceCard {
+  return (generatedTime(right) ?? 0) >= (generatedTime(left) ?? 0)
+    ? right
+    : left
+}
+
 function cardKey(card: WorkPresenceCard): string {
-  return `${card.actor}\0${card.summary}\0${card.fullSummary ?? ""}`
+  return `${actorKey(card.actor)}\0${card.summary}\0${card.fullSummary ?? ""}\0${card.status ?? "ready"}`
 }
 
 /**
@@ -68,17 +82,23 @@ export function WorkPresenceFeed({
   const seeded = React.useRef(false)
   const announced = React.useRef(new Set<string>())
 
-  const visible = React.useMemo(
-    () =>
-      (Array.isArray(cards) ? cards : [])
-        .filter(isUsableCard)
-        .sort((a, b) => (generatedTime(a) ?? 0) - (generatedTime(b) ?? 0)),
-    [cards],
-  )
+  const visible = React.useMemo(() => {
+    const byActor = new Map<string, WorkPresenceCard>()
+    for (const card of Array.isArray(cards) ? cards : []) {
+      if (!isUsableCard(card)) continue
+      const key = actorKey(card.actor)
+      const existing = byActor.get(key)
+      byActor.set(key, existing ? newestVisible(existing, card) : card)
+    }
+    return [...byActor.values()].sort(
+      (a, b) => (generatedTime(a) ?? 0) - (generatedTime(b) ?? 0),
+    )
+  }, [cards])
 
   React.useEffect(() => {
     const newcomers = visible.filter(
-      (card) => !announced.current.has(cardKey(card)),
+      (card) =>
+        card.status !== "generating" && !announced.current.has(cardKey(card)),
     )
     for (const card of visible) announced.current.add(cardKey(card))
     if (!seeded.current) {
@@ -105,18 +125,38 @@ export function WorkPresenceFeed({
         className
       )}
     >
-      {visible.map((card) => (
-        <Message key={card.actor} className="items-start">
+      {visible.map((card) => {
+        const generating = card.status === "generating"
+        const generatedAt = new Date(generatedTime(card)!)
+        const relativeTime = formatDistanceToNow(generatedAt, {
+          addSuffix: true,
+        })
+        return (
+        <Message key={actorKey(card.actor)} className="items-start">
           <ActorAvatar actor={card.actor} />
           <MessageContent className="gap-1">
             <MessageHeader className="justify-between gap-3">
               <span className="truncate">{card.actor}</span>
               <span className="shrink-0 font-normal">
-                {formatDistanceToNow(new Date(generatedTime(card)!), {
-                  addSuffix: true,
-                })}
+                {generating ? (
+                  <span className="inline-flex items-center gap-1">
+                    <Spinner className="size-3" />
+                    Generating
+                  </span>
+                ) : (
+                  <time dateTime={generatedAt.toISOString()}>
+                    {relativeTime}
+                  </time>
+                )}
               </span>
             </MessageHeader>
+            {generating ? (
+              <Bubble variant="outline" className="max-w-full">
+                <BubbleContent className="w-full border-2 bg-card shadow-md">
+                  <p className="text-muted-foreground">{`“${card.summary}”`}</p>
+                </BubbleContent>
+              </Bubble>
+            ) : (
             <Dialog>
               <DialogTrigger
                 render={
@@ -135,16 +175,32 @@ export function WorkPresenceFeed({
               </DialogTrigger>
               <DialogContent className="max-h-[min(80svh,48rem)] overflow-y-auto sm:max-w-xl">
                 <DialogHeader>
-                  <DialogTitle>{card.actor}</DialogTitle>
+                  <div className="flex items-center gap-3 pr-8">
+                    <ActorAvatar actor={card.actor} className="self-center" />
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <DialogTitle className="truncate">
+                        {card.actor}
+                      </DialogTitle>
+                      <time
+                        dateTime={generatedAt.toISOString()}
+                        title={generatedAt.toLocaleString()}
+                        className="text-xs font-medium text-muted-foreground"
+                      >
+                        {relativeTime}
+                      </time>
+                    </div>
+                  </div>
                   <DialogDescription className="whitespace-pre-wrap leading-relaxed">
                     {card.fullSummary?.trim() || card.summary}
                   </DialogDescription>
                 </DialogHeader>
               </DialogContent>
             </Dialog>
+            )}
           </MessageContent>
         </Message>
-      ))}
+        )
+      })}
     </MessageGroup>
   )
 }

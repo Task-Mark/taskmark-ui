@@ -20,6 +20,7 @@ export type WorkPresenceCard = {
   fullSummary?: string
   generatedAt: string
   sourceEventIds?: readonly string[]
+  status?: "ready" | "generating"
 }
 
 export const WORK_ACTIVITY_MAX_VISIBLE = 5
