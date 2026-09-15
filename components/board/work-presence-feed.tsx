@@ -23,7 +23,7 @@ import { bong001Sound } from "../../lib/bong-001"
 import { playSound } from "../../lib/sound-engine"
 import type { WorkPresenceCard } from "../../lib/board-model/work-activity"
 import { ActorAvatar } from "./actor-avatar"
-import { Spinner } from "../ui/spinner"
+import { Skeleton } from "../ui/skeleton"
 
 function generatedTime(card: WorkPresenceCard): number | null {
   const value = Date.parse(card.generatedAt)
@@ -139,9 +139,8 @@ export function WorkPresenceFeed({
               <span className="truncate">{card.actor}</span>
               <span className="shrink-0 font-normal">
                 {generating ? (
-                  <span className="inline-flex items-center gap-1">
-                    <Spinner className="size-3" />
-                    Generating
+                  <span className="font-normal text-muted-foreground">
+                    Generating report
                   </span>
                 ) : (
                   <time dateTime={generatedAt.toISOString()}>
@@ -151,9 +150,13 @@ export function WorkPresenceFeed({
               </span>
             </MessageHeader>
             {generating ? (
-              <Bubble variant="outline" className="max-w-full">
+              <Bubble variant="outline" className="max-w-full" aria-busy="true">
                 <BubbleContent className="w-full border-2 bg-card shadow-md">
-                  <p className="text-muted-foreground">{`“${card.summary}”`}</p>
+                  <div className="flex flex-col gap-2 py-0.5">
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-[88%]" />
+                    <Skeleton className="h-3 w-[62%]" />
+                  </div>
                 </BubbleContent>
               </Bubble>
             ) : (
