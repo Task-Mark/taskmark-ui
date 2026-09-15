@@ -25,6 +25,7 @@ import { cn } from "../../lib/utils"
 import { formatTaskmarkDateTime } from "../../lib/format-date"
 import { bong001Sound } from "../../lib/bong-001"
 import { playSound } from "../../lib/sound-engine"
+import { FLOATING_CHROME_PULSE_MS } from "../../lib/board-model/floating-chrome"
 import {
   WORK_ACTIVITY_MAX_VISIBLE,
   type WorkActivityEvent,
@@ -84,10 +85,113 @@ function isUsableEvent(value: WorkActivityEvent): boolean {
   )
 }
 
+function WorkActivityCard({ event }: { event: WorkActivityEvent }) {
+  const received = new Date(receivedTime(event)!)
+  return (
+    <Message className="items-start">
+      <ActorAvatar actor={event.actor} />
+      <MessageContent className="gap-1">
+        <MessageHeader className="justify-between gap-3">
+          <span className="truncate">{event.actor || "Unknown actor"}</span>
+          <span className="shrink-0 font-normal">
+            {formatDistanceToNow(received, { addSuffix: true })}
+          </span>
+        </MessageHeader>
+        <Bubble variant="outline" className="max-w-full">
+          <BubbleContent className="flex w-full flex-col border-2 bg-card shadow-md">
+            <div className="mb-2 flex justify-end">
+              <FeedItemTag itemId={event.itemId} itemTitle={event.itemTitle} />
+            </div>
+            <p className="text-muted-foreground">{event.summary}</p>
+          </BubbleContent>
+        </Bubble>
+        <MessageFooter>
+          Started {formatTaskmarkDateTime(event.started)}
+        </MessageFooter>
+      </MessageContent>
+    </Message>
+  )
+}
+
+export function WorkActivityToastStack({
+  events,
+  className,
+}: {
+  events: readonly WorkActivityEvent[]
+  className?: string
+}) {
+  if (events.length === 0) return null
+  return (
+    <MessageGroup
+      aria-label="New work activity"
+      aria-live="polite"
+      className={cn(
+        "pointer-events-auto hidden w-[min(24rem,calc(100vw-1.5rem))] md:flex",
+        className,
+      )}
+    >
+      {events.map((event) => (
+        <WorkActivityCard key={event.id} event={event} />
+      ))}
+    </MessageGroup>
+  )
+}
+
+export function useWorkActivityToasts(active: boolean): {
+  toasts: readonly WorkActivityEvent[]
+  push: (events: readonly WorkActivityEvent[]) => void
+} {
+  const [toasts, setToasts] = React.useState<WorkActivityEvent[]>([])
+  const timers = React.useRef(new Map<string, number>())
+
+  const clear = React.useCallback(() => {
+    for (const timer of timers.current.values()) window.clearTimeout(timer)
+    timers.current.clear()
+    setToasts([])
+  }, [])
+
+  React.useEffect(() => {
+    if (!active) clear()
+  }, [active, clear])
+
+  React.useEffect(() => () => clear(), [clear])
+
+  const push = React.useCallback(
+    (events: readonly WorkActivityEvent[]) => {
+      if (!active || events.length === 0) return
+      setToasts((previous) => {
+        const merged = new Map(previous.map((event) => [event.id, event]))
+        for (const event of events) merged.set(event.id, event)
+        return Array.from(merged.values())
+          .sort((a, b) => (receivedTime(a) ?? 0) - (receivedTime(b) ?? 0))
+          .slice(-WORK_ACTIVITY_MAX_VISIBLE)
+      })
+      for (const event of events) {
+        const existing = timers.current.get(event.id)
+        if (existing) window.clearTimeout(existing)
+        timers.current.set(
+          event.id,
+          window.setTimeout(() => {
+            timers.current.delete(event.id)
+            setToasts((previous) =>
+              previous.filter((item) => item.id !== event.id),
+            )
+          }, FLOATING_CHROME_PULSE_MS),
+        )
+      }
+    },
+    [active],
+  )
+
+  return { toasts, push }
+}
+
 export function WorkActivityFeed({
   events,
   ready = true,
+  layout = "floating",
   className,
+  onNewEvents,
 }: {
   events: readonly WorkActivityEvent[]
   /**
@@ -95,11 +199,17 @@ export function WorkActivityFeed({
    * feed silently, so a page load or refresh never replays existing messages.
    */
   ready?: boolean
+  /** Floating stays out of the page flow and is hidden on mobile. */
+  layout?: "floating" | "inline"
   className?: string
+  /** Fires after the silent seed when newly received worklog events appear. */
+  onNewEvents?: (events: readonly WorkActivityEvent[]) => void
 }) {
   const [visible, setVisible] = React.useState<WorkActivityEvent[]>([])
   const seeded = React.useRef(false)
   const announcedIds = React.useRef(new Set<string>())
+  const onNewEventsRef = React.useRef(onNewEvents)
+  onNewEventsRef.current = onNewEvents
 
   React.useEffect(() => {
     const incoming = (Array.isArray(events) ? events : []).filter(isUsableEvent)
@@ -110,6 +220,7 @@ export function WorkActivityFeed({
     if (!seeded.current) {
       if (ready) seeded.current = true
     } else if (newcomers.length > 0) {
+      onNewEventsRef.current?.(newcomers)
       for (let index = 0; index < newcomers.length; index += 1) {
         window.setTimeout(() => {
           void playSound(bong001Sound.dataUri, { volume: 0.7 }).catch(() => {})
@@ -133,38 +244,15 @@ export function WorkActivityFeed({
       aria-label="Recent work activity"
       aria-live="polite"
       className={cn(
-        "pointer-events-auto fixed right-4 bottom-4 z-50 hidden w-[min(24rem,calc(100vw-2rem))] md:flex",
+        "pointer-events-auto",
+        layout === "floating" &&
+          "fixed right-4 bottom-12 z-50 hidden w-[min(24rem,calc(100vw-2rem))] md:flex",
         className
       )}
     >
-      {visible.map((event) => {
-        const received = new Date(receivedTime(event)!)
-        return (
-          <Message key={event.id} className="items-start">
-            <ActorAvatar actor={event.actor} />
-            <MessageContent className="gap-1">
-              <MessageHeader className="justify-between gap-3">
-                <span className="truncate">{event.actor || "Unknown actor"}</span>
-                <span className="shrink-0 font-normal">
-                  {formatDistanceToNow(received, { addSuffix: true })}
-                </span>
-              </MessageHeader>
-              <Bubble variant="outline" className="max-w-full">
-                <BubbleContent className="w-full border-2 bg-card shadow-md">
-                  <FeedItemTag
-                    itemId={event.itemId}
-                    itemTitle={event.itemTitle}
-                  />
-                  <p className="mt-2 text-muted-foreground">{event.summary}</p>
-                </BubbleContent>
-              </Bubble>
-              <MessageFooter>
-                Started {formatTaskmarkDateTime(event.started)}
-              </MessageFooter>
-            </MessageContent>
-          </Message>
-        )
-      })}
+      {visible.map((event) => (
+        <WorkActivityCard key={event.id} event={event} />
+      ))}
     </MessageGroup>
   )
 }

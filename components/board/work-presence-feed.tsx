@@ -22,6 +22,7 @@ import { cn } from "../../lib/utils"
 import { bong001Sound } from "../../lib/bong-001"
 import { playSound } from "../../lib/sound-engine"
 import type { WorkPresenceCard } from "../../lib/board-model/work-activity"
+import { WORK_PRESENCE_MAX_VISIBLE } from "../../lib/board-model/work-activity"
 import { ActorAvatar } from "./actor-avatar"
 import { Skeleton } from "../ui/skeleton"
 
@@ -31,14 +32,15 @@ function generatedTime(card: WorkPresenceCard): number | null {
 }
 
 function isUsableCard(value: WorkPresenceCard): boolean {
+  if (!value || typeof value.actor !== "string" || !value.actor.trim()) {
+    return false
+  }
+  if (value.status === "generating") return true
   return Boolean(
-    value &&
-      typeof value.actor === "string" &&
-      value.actor.trim() &&
-      typeof value.summary === "string" &&
+    typeof value.summary === "string" &&
       value.summary.trim() &&
       typeof value.generatedAt === "string" &&
-      generatedTime(value) != null
+      generatedTime(value) != null,
   )
 }
 
@@ -46,10 +48,12 @@ function actorKey(actor: string): string {
   return actor.trim().toLocaleLowerCase() || "unknown"
 }
 
-function newestVisible(
+function preferredCard(
   left: WorkPresenceCard,
   right: WorkPresenceCard,
 ): WorkPresenceCard {
+  if (left.status === "generating" && right.status !== "generating") return left
+  if (right.status === "generating" && left.status !== "generating") return right
   return (generatedTime(right) ?? 0) >= (generatedTime(left) ?? 0)
     ? right
     : left
@@ -68,6 +72,7 @@ export function WorkPresenceFeed({
   ready = true,
   layout = "floating",
   className,
+  onNewCards,
 }: {
   cards: readonly WorkPresenceCard[]
   /**
@@ -78,9 +83,13 @@ export function WorkPresenceFeed({
   /** Floating stays out of the page flow and is hidden on mobile. */
   layout?: "floating" | "inline"
   className?: string
+  /** Fires after the silent seed when a ready presence summary appears. */
+  onNewCards?: (cards: readonly WorkPresenceCard[]) => void
 }) {
   const seeded = React.useRef(false)
   const announced = React.useRef(new Set<string>())
+  const onNewCardsRef = React.useRef(onNewCards)
+  onNewCardsRef.current = onNewCards
 
   const visible = React.useMemo(() => {
     const byActor = new Map<string, WorkPresenceCard>()
@@ -88,11 +97,13 @@ export function WorkPresenceFeed({
       if (!isUsableCard(card)) continue
       const key = actorKey(card.actor)
       const existing = byActor.get(key)
-      byActor.set(key, existing ? newestVisible(existing, card) : card)
+      byActor.set(key, existing ? preferredCard(existing, card) : card)
     }
-    return [...byActor.values()].sort(
-      (a, b) => (generatedTime(a) ?? 0) - (generatedTime(b) ?? 0),
-    )
+    return [...byActor.values()]
+      .sort(
+        (a, b) => (generatedTime(a) ?? 0) - (generatedTime(b) ?? 0),
+      )
+      .slice(-WORK_PRESENCE_MAX_VISIBLE)
   }, [cards])
 
   React.useEffect(() => {
@@ -105,6 +116,7 @@ export function WorkPresenceFeed({
       if (ready) seeded.current = true
       return
     }
+    if (newcomers.length > 0) onNewCardsRef.current?.(newcomers)
     for (let index = 0; index < newcomers.length; index += 1) {
       window.setTimeout(() => {
         void playSound(bong001Sound.dataUri, { volume: 0.7 }).catch(() => {})
@@ -121,18 +133,29 @@ export function WorkPresenceFeed({
       className={cn(
         "pointer-events-auto",
         layout === "floating" &&
-          "fixed left-4 bottom-4 z-50 hidden w-[min(24rem,calc(100vw-2rem))] md:flex",
+          "fixed left-4 bottom-12 z-50 hidden w-[min(24rem,calc(100vw-2rem))] md:flex",
         className
       )}
     >
       {visible.map((card) => {
         const generating = card.status === "generating"
-        const generatedAt = new Date(generatedTime(card)!)
-        const relativeTime = formatDistanceToNow(generatedAt, {
-          addSuffix: true,
-        })
+        const generatedAtMs = generatedTime(card)
+        const generatedAt =
+          generatedAtMs != null ? new Date(generatedAtMs) : null
+        const relativeTime = generatedAt
+          ? formatDistanceToNow(generatedAt, { addSuffix: true })
+          : ""
         return (
-        <Message key={actorKey(card.actor)} className="items-start">
+        <Message
+          key={actorKey(card.actor)}
+          className="items-start"
+          aria-busy={generating || undefined}
+          aria-label={
+            generating
+              ? `Generating a work summary for ${card.actor}`
+              : undefined
+          }
+        >
           <ActorAvatar actor={card.actor} />
           <MessageContent className="gap-1">
             <MessageHeader className="justify-between gap-3">
@@ -140,17 +163,17 @@ export function WorkPresenceFeed({
               <span className="shrink-0 font-normal">
                 {generating ? (
                   <span className="font-normal text-muted-foreground">
-                    Generating report
+                    Generating summary
                   </span>
-                ) : (
+                ) : generatedAt ? (
                   <time dateTime={generatedAt.toISOString()}>
                     {relativeTime}
                   </time>
-                )}
+                ) : null}
               </span>
             </MessageHeader>
             {generating ? (
-              <Bubble variant="outline" className="max-w-full" aria-busy="true">
+              <Bubble variant="outline" className="max-w-full" aria-hidden>
                 <BubbleContent className="w-full border-2 bg-card shadow-md">
                   <div className="flex flex-col gap-2 py-0.5">
                     <Skeleton className="h-3 w-full" />
@@ -159,7 +182,7 @@ export function WorkPresenceFeed({
                   </div>
                 </BubbleContent>
               </Bubble>
-            ) : (
+            ) : generatedAt ? (
             <Dialog>
               <DialogTrigger
                 render={
@@ -199,7 +222,7 @@ export function WorkPresenceFeed({
                 </DialogHeader>
               </DialogContent>
             </Dialog>
-            )}
+            ) : null}
           </MessageContent>
         </Message>
         )

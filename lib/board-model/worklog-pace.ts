@@ -1,6 +1,6 @@
 import type { WorklogEntry } from "./worklog"
 
-export const WORKLOG_PACE_LOOKBACK_DAYS = 30
+export const WORKLOG_PACE_LOOKBACK_DAYS = 10
 export const WORKLOG_PACE_HISTORY_DAYS = 10
 export const WORKLOG_PACE_ANNOYED_RATIO = 0.5
 export const WORKLOG_PACE_HAPPY_RATIO = 0.7
@@ -48,26 +48,51 @@ function localNoonDays(now: Date, lookbackDays: number): Date[] {
 
 function countByDay(
   entries: readonly Pick<WorklogEntry, "started">[],
-  windowKeys: Set<string>,
+  windowKeys?: Set<string>,
 ): Map<string, number> {
   const counts = new Map<string, number>()
-  for (const key of windowKeys) counts.set(key, 0)
+  if (windowKeys) {
+    for (const key of windowKeys) counts.set(key, 0)
+  }
   for (const entry of entries) {
     const started = startedDate(entry.started)
     if (!started) continue
     const key = localDayKey(started)
-    if (!windowKeys.has(key)) continue
+    if (windowKeys && !windowKeys.has(key)) continue
     counts.set(key, (counts.get(key) ?? 0) + 1)
   }
   return counts
 }
 
-function peakOf(counts: Map<string, number>): number {
+function peakOf(counts: Map<string, number>, keys?: Iterable<string>): number {
   let peak = 0
-  for (const count of counts.values()) {
+  const source = keys ?? counts.keys()
+  for (const key of source) {
+    const count = counts.get(key) ?? 0
     if (count > peak) peak = count
   }
   return peak
+}
+
+/** Busiest day on or before `dayKey`; used when the lookback window is idle. */
+export function lastWorkedDayPeak(
+  counts: Map<string, number>,
+  dayKey: string,
+): number {
+  let latest = ""
+  for (const key of counts.keys()) {
+    if (key <= dayKey && key > latest) latest = key
+  }
+  return latest ? (counts.get(latest) ?? 0) : 0
+}
+
+function peakForWindow(
+  allCounts: Map<string, number>,
+  windowKeys: Iterable<string>,
+  dayKey: string,
+): number {
+  const windowPeak = peakOf(allCounts, windowKeys)
+  return windowPeak > 0 ? windowPeak : lastWorkedDayPeak(allCounts, dayKey)
 }
 
 export function dailyWorklogPace(
@@ -77,10 +102,10 @@ export function dailyWorklogPace(
 ): WorklogPace {
   const todayKey = localDayKey(now)
   const days = localNoonDays(now, lookbackDays)
-  const windowKeys = new Set(days.map(localDayKey))
-  const counts = countByDay(entries, windowKeys)
-  const today = counts.get(todayKey) ?? 0
-  const peak = peakOf(counts)
+  const windowKeys = days.map(localDayKey)
+  const allCounts = countByDay(entries)
+  const today = allCounts.get(todayKey) ?? 0
+  const peak = peakForWindow(allCounts, windowKeys, todayKey)
   const fill =
     peak > 0 ? Math.min(100, Math.max(0, (today / peak) * 100)) : 0
   return { today, peak, fill }
@@ -114,11 +139,9 @@ export function dailyWorklogHistory(
   lookbackDays: number = WORKLOG_PACE_LOOKBACK_DAYS,
 ): WorklogPaceDay[] {
   const todayKey = localDayKey(now)
-  // Every history day needs its own trailing lookback window, so the counted
-  // span reaches back beyond the oldest shown day.
   const spanDays = localNoonDays(now, lookbackDays + historyDays - 1)
   const spanKeys = spanDays.map(localDayKey)
-  const counts = countByDay(entries, new Set(spanKeys))
+  const allCounts = countByDay(entries)
   const endOfDay = new Date(now)
   endOfDay.setHours(WORKLOG_PACE_FLAME_HOUR, 0, 0, 0)
 
@@ -126,12 +149,9 @@ export function dailyWorklogHistory(
   return spanKeys.slice(historyStart).map((key, index) => {
     const endIndex = historyStart + index
     const startIndex = Math.max(0, endIndex - lookbackDays + 1)
-    let peak = 0
-    for (let i = startIndex; i <= endIndex; i += 1) {
-      const count = counts.get(spanKeys[i]) ?? 0
-      if (count > peak) peak = count
-    }
-    const count = counts.get(key) ?? 0
+    const windowKeys = spanKeys.slice(startIndex, endIndex + 1)
+    const peak = peakForWindow(allCounts, windowKeys, key)
+    const count = allCounts.get(key) ?? 0
     const at = key === todayKey ? now : endOfDay
     return {
       day: key,

@@ -13,8 +13,11 @@ import { ReportsPanel } from "./reports-panel"
 import { WorkItemsList } from "./work-items-list"
 import { WorkItemSheetProvider } from "./work-item-sheet"
 import { WorklogPanel } from "./worklog-panel"
+import { BoardFloatingChrome } from "./board-floating-chrome"
+import { WorklogSpeedometer } from "./worklog-speedometer"
 import { HIDE_COMPLETED_DEFAULT } from "../../lib/board-model/constants"
 import { flattenWorklogEntries } from "../../lib/board-model/worklog"
+import type { WorkActivityEvent, WorkPresenceCard } from "../../lib/board-model/work-activity"
 import {
   LIST_VIEW_LABELS,
   parseListViewMode,
@@ -33,6 +36,7 @@ export function StaticBoardApp({
   actions,
   mobileMenu,
   mobileAside,
+  floatingChrome,
   title = "Taskmark",
   tagline = "Product memory for agent work",
 }: {
@@ -42,6 +46,19 @@ export function StaticBoardApp({
   mobileMenu?: React.ReactNode
   /** Rendered in the page body only on mobile, where floating chrome is hidden. */
   mobileAside?: React.ReactNode
+  /**
+   * Floating worklog feed, presence, and count card. Pass `false` when the
+   * host renders its own live chrome (Cloud). Omit to derive events from the
+   * snapshot.
+   */
+  floatingChrome?:
+    | false
+    | {
+        events?: readonly WorkActivityEvent[]
+        eventsReady?: boolean
+        presence?: readonly WorkPresenceCard[]
+        presenceReady?: boolean
+      }
   title?: string
   tagline?: string
 }) {
@@ -87,7 +104,12 @@ export function StaticBoardApp({
   return (
     <WorkItemSheetProvider>
       <div className="tm-surface min-h-svh">
-        <AppBar title={title} tagline={tagline} mobileMenu={mobileMenu}>
+        <AppBar
+          title={title}
+          tagline={tagline}
+          mobileMenu={mobileMenu}
+          floatingChromeToggle
+        >
           {actions}
         </AppBar>
 
@@ -132,7 +154,13 @@ export function StaticBoardApp({
 
           <ProjectStatusMetricsStrip metrics={statusMetrics} />
 
-          {mobileAside ? <div className="md:hidden">{mobileAside}</div> : null}
+          {mobileAside ? (
+            <div className="md:hidden">{mobileAside}</div>
+          ) : (
+            <div className="md:hidden">
+              <WorklogSpeedometer entries={worklogEntries} layout="inline" />
+            </div>
+          )}
 
           {activeView === "overall" ? (
             <>
@@ -169,6 +197,15 @@ export function StaticBoardApp({
             <ReportsPanel reports={reports} />
           ) : null}
         </div>
+        {floatingChrome === false ? null : (
+          <BoardFloatingChrome
+            events={floatingChrome?.events}
+            eventsReady={floatingChrome?.eventsReady}
+            presence={floatingChrome?.presence}
+            presenceReady={floatingChrome?.presenceReady}
+            worklogEntries={worklogEntries}
+          />
+        )}
       </div>
     </WorkItemSheetProvider>
   )

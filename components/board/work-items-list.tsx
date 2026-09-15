@@ -49,10 +49,11 @@ import {
   collectUniqueTags,
   DEFAULT_TIMEFRAME_FILTER,
   filterListRows,
-  isTimeframeActive,
+  listEmptyKind,
   listFilterResetKey,
   type TimeframeFilterState,
 } from "../../lib/board-model/list-filters"
+import { BoardListEmptyState } from "./caught-up-empty-state"
 import type { SolvedCompletionSample } from "../../lib/board-model/timeframe-filters"
 import {
   sortRowsByTableSort,
@@ -136,12 +137,15 @@ export function WorkItemsList({
   )
 
   const hasSourceRows = rows.length > 0
-  const filtersActive =
-    Boolean(query.trim()) ||
-    hideCompleted ||
-    parentKeys.length > 0 ||
-    selectedTags.length > 0 ||
-    isTimeframeActive(timeframe)
+  const emptyKind = listEmptyKind({
+    hasSourceRows,
+    visibleCount: filtered.length,
+    hideCompleted,
+    query,
+    parentKeys,
+    selectedTags,
+    timeframe,
+  })
 
   return (
     <Card>
@@ -206,11 +210,11 @@ export function WorkItemsList({
               onSelectedTagsChange={setSelectedTags}
             />
             {filtered.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {filtersActive
-                  ? "No work items match the current search or filters."
-                  : "No stories or epic-direct tasks on this board yet."}
-              </p>
+              <BoardListEmptyState
+                kind={emptyKind}
+                sourceMessage="No stories or epic-direct tasks on this board yet."
+                filteredMessage="No work items match the current search or filters."
+              />
             ) : (
               <>
                 <MobileSortSelect

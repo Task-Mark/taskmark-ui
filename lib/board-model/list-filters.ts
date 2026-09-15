@@ -3,6 +3,7 @@
 import { HIDE_COMPLETED_DEFAULT } from "./constants"
 import {
   DEFAULT_TIMEFRAME_FILTER,
+  isTimeframeActive,
   passesTimeframeFilter,
   timeframeResetKey,
   type TimeframeFilterState,
@@ -331,3 +332,30 @@ export function listFilterResetKey(
  */
 export const FILTER_CHIPS_FIELD_CLASS =
   "flex min-h-8 flex-wrap items-center gap-1 rounded border-2 bg-input bg-clip-padding px-2.5 py-1 text-sm shadow-sm transition-colors focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary"
+
+export type ListEmptyKind = "source" | "caught-up" | "filtered"
+
+/**
+ * Why a list has no visible rows. Hide-completed with no remaining open work
+ * is a caught-up empty state, not a filter mismatch.
+ */
+export function listEmptyKind(input: {
+  hasSourceRows: boolean
+  visibleCount: number
+  hideCompleted: boolean
+  query?: string
+  parentKeys?: readonly string[]
+  selectedTags?: readonly string[]
+  timeframe?: TimeframeFilterState
+}): ListEmptyKind {
+  if (!input.hasSourceRows) return "source"
+  if (input.visibleCount > 0) return "source"
+  const restricting =
+    Boolean(input.query?.trim()) ||
+    (input.parentKeys?.length ?? 0) > 0 ||
+    (input.selectedTags?.length ?? 0) > 0 ||
+    isTimeframeActive(input.timeframe ?? DEFAULT_TIMEFRAME_FILTER)
+  if (restricting) return "filtered"
+  if (input.hideCompleted) return "caught-up"
+  return "filtered"
+}

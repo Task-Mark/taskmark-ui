@@ -38,8 +38,10 @@ import type { EpicWorkItemsList } from "../../lib/board-model/flat-work-item-typ
 import type { StoryItemList } from "../../lib/board-model/item-types"
 import {
   DEFAULT_TIMEFRAME_FILTER,
+  listEmptyKind,
   type TimeframeFilterState,
 } from "../../lib/board-model/list-filters"
+import { BoardListEmptyState } from "./caught-up-empty-state"
 import {
   buildOverallTree,
   filterOverallTree,
@@ -442,9 +444,17 @@ export function OverallTreeList({
               onHideCompletedChange={setHideCompleted}
             />
             {filtered.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No work matches the current search or filters.
-              </p>
+              <BoardListEmptyState
+                kind={listEmptyKind({
+                  hasSourceRows: true,
+                  visibleCount: 0,
+                  hideCompleted,
+                  query,
+                  timeframe,
+                })}
+                sourceMessage="No epics in this board yet."
+                filteredMessage="No work matches the current search or filters."
+              />
             ) : (
               <>
                 <div className="overflow-hidden rounded-md border" role="tree">

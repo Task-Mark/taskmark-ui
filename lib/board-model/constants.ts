@@ -21,6 +21,14 @@ export const HIDE_COMPLETED_COOKIE = "taskmark_hide_completed"
 /** Completed work stays hidden until the user asks to see it. */
 export const HIDE_COMPLETED_DEFAULT = true
 
+/** Shared floating chrome pref (client-readable). `1` is collapsed. */
+export const FLOATING_CHROME_COOKIE = "taskmark_floating_chrome"
+
+export const FLOATING_CHROME_COOKIE_MAX_AGE = MASTER_FOLDER_COOKIE_MAX_AGE
+
+/** Cloud (and other boards) start with messages minimized until the user expands them. */
+export const FLOATING_CHROME_COLLAPSED_DEFAULT = true
+
 /** How deep to walk under the master folder when discovering boards */
 export const DISCOVERY_MAX_DEPTH = 3
 

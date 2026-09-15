@@ -34,7 +34,7 @@ const ICONS: Record<
   flame: IconFlameFilled,
 }
 
-/** Traffic-light reading of today's pace against the 30-day peak. */
+/** Traffic-light reading of today's pace against the 10-day peak. */
 const ICON_COLOR: Record<WorklogPaceIcon, string> = {
   zzz: "text-slate-500",
   smile: "text-sky-500",
@@ -54,25 +54,44 @@ const ICON_DISC: Record<WorklogPaceIcon, string> = {
 function PaceGlyph({
   icon,
   bounce,
+  size = "md",
 }: {
   icon: WorklogPaceIcon
   bounce?: boolean
+  size?: "md" | "sm"
 }) {
   const Icon = ICONS[icon]
+  const compact = size === "sm"
   return (
     <div
       className={cn(
-        "flex size-16 items-center justify-center rounded-full ring-2",
+        "flex items-center justify-center rounded-full",
+        compact ? "size-5 ring-1" : "size-16 ring-2",
         ICON_DISC[icon],
         bounce && "animate-bounce",
       )}
     >
       <Icon
         aria-hidden
-        stroke={2.25}
-        className={cn("size-12", ICON_COLOR[icon])}
+        stroke={compact ? 2 : 2.25}
+        className={cn(compact ? "size-3.5" : "size-12", ICON_COLOR[icon])}
       />
     </div>
+  )
+}
+
+export function WorklogPacePeek({
+  icon,
+  today,
+}: {
+  icon: WorklogPaceIcon
+  today: number
+}) {
+  return (
+    <span className="flex flex-col items-center gap-1 leading-none">
+      <PaceGlyph icon={icon} size="sm" />
+      <span className="font-head text-xs leading-none tabular-nums">{today}</span>
+    </span>
   )
 }
 
@@ -106,10 +125,10 @@ export function WorklogSpeedometer({
 
   return (
     <div
-      aria-label={`Today ${pace.today} work logs, peak ${pace.peak} in the last 30 days`}
+      aria-label={`Today ${pace.today} work logs, peak ${pace.peak} in the last 10 days`}
       className={cn(
         layout === "floating"
-          ? "pointer-events-none fixed bottom-4 left-4 z-50 hidden w-[18rem] md:block"
+          ? "pointer-events-none fixed bottom-12 left-4 z-50 hidden w-[18rem] md:block"
           : "w-full",
         className,
       )}
@@ -140,11 +159,11 @@ export function WorklogSpeedometer({
           </div>
         </div>
         <p className="mt-2 text-center text-xs font-medium text-muted-foreground">
-          Work logs today vs 30-day peak ({pace.peak})
+          Work logs today vs 10-day peak ({pace.peak})
         </p>
         <div
           aria-label="Last 10 days"
-          className="pointer-events-auto mt-2 flex items-center justify-between gap-0.5"
+          className="pointer-events-auto mt-2 flex items-end justify-between gap-0.5"
         >
           {history.map((day) => {
             const DayIcon = ICONS[day.icon]
@@ -152,16 +171,23 @@ export function WorklogSpeedometer({
               <span
                 key={day.day}
                 title={`${day.day}: ${day.count} work logs`}
-                className={cn(
-                  "flex size-6 items-center justify-center rounded-full ring-1",
-                  ICON_DISC[day.icon],
-                )}
+                className="flex flex-col items-center gap-0.5"
               >
-                <DayIcon
-                  aria-hidden
-                  stroke={2}
-                  className={cn("size-4", ICON_COLOR[day.icon])}
-                />
+                <span
+                  className={cn(
+                    "flex size-6 items-center justify-center rounded-full ring-1",
+                    ICON_DISC[day.icon],
+                  )}
+                >
+                  <DayIcon
+                    aria-hidden
+                    stroke={2}
+                    className={cn("size-4", ICON_COLOR[day.icon])}
+                  />
+                </span>
+                <span className="font-head text-[10px] leading-none tabular-nums text-muted-foreground">
+                  {day.count}
+                </span>
               </span>
             )
           })}

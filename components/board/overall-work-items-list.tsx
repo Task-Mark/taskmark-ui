@@ -45,10 +45,11 @@ import type { EpicWorkItemsList } from "../../lib/board-model/flat-work-item-typ
 import {
   DEFAULT_TIMEFRAME_FILTER,
   filterListRows,
-  isTimeframeActive,
+  listEmptyKind,
   listFilterResetKey,
   type TimeframeFilterState,
 } from "../../lib/board-model/list-filters"
+import { BoardListEmptyState } from "./caught-up-empty-state"
 import type { SolvedCompletionSample } from "../../lib/board-model/timeframe-filters"
 import {
   sortRowsByTableSort,
@@ -122,8 +123,13 @@ export function OverallWorkItemsList({
   )
 
   const hasSourceRows = rows.length > 0
-  const filtersActive =
-    Boolean(query.trim()) || hideCompleted || isTimeframeActive(timeframe)
+  const emptyKind = listEmptyKind({
+    hasSourceRows,
+    visibleCount: filtered.length,
+    hideCompleted,
+    query,
+    timeframe,
+  })
 
   return (
     <Card>
@@ -182,11 +188,15 @@ export function OverallWorkItemsList({
               onHideCompletedChange={setHideCompleted}
             />
             {filtered.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {filtersActive
-                  ? "No work items match the current search or filters."
-                  : "No work items under this epic yet."}
-              </p>
+              <BoardListEmptyState
+                kind={emptyKind}
+                sourceMessage={`No work items under this epic yet${
+                  epicTitle?.toLowerCase() === "general"
+                    ? " — stories and general tasks will appear here."
+                    : "."
+                }`}
+                filteredMessage="No work items match the current search or filters."
+              />
             ) : (
               <>
                 <Table>
