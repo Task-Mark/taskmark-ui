@@ -1,4 +1,5 @@
 export * from "./app-bar"
+export * from "./app-footer"
 export * from "./board-shell"
 export * from "./static-board-app"
 export * from "./work-item-sheet"

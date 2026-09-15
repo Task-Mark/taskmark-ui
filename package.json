@@ -1,6 +1,6 @@
 {
   "name": "@taskmark/components",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Shared Taskmark UI components, board chrome, and design tokens",
   "private": false,
   "license": "MIT",
@@ -33,6 +33,7 @@
     "./ui/*": "./components/ui/*.tsx",
     "./charts/*": "./components/charts/*.tsx",
     "./board": "./components/board/index.ts",
+    "./board/app-footer": "./components/board/app-footer.tsx",
     "./board/worklog-panel": "./components/board/worklog-panel.tsx",
     "./board-model": "./lib/board-model/index.ts",
     "./board-model/worklog": "./lib/board-model/worklog.ts",
