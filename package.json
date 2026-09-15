@@ -2,6 +2,19 @@
   "name": "@taskmark/components",
   "version": "0.5.0",
   "description": "Shared Taskmark UI components, board chrome, and design tokens",
+  "private": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Task-Mark/taskmark-ui.git"
+  },
+  "homepage": "https://github.com/Task-Mark/taskmark-ui#readme",
+  "bugs": {
+    "url": "https://github.com/Task-Mark/taskmark-ui/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": [
     "./styles/*.css"
@@ -11,7 +24,9 @@
     "hooks",
     "lib",
     "styles",
-    "index.ts"
+    "index.ts",
+    "README.md",
+    "LICENSE"
   ],
   "exports": {
     ".": "./index.ts",
