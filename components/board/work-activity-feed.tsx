@@ -16,6 +16,14 @@ import {
 } from "@taskmark/components/ui/message"
 import { Badge } from "@taskmark/components/ui/badge"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@taskmark/components/ui/dialog"
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -87,26 +95,66 @@ function isUsableEvent(value: WorkActivityEvent): boolean {
 
 function WorkActivityCard({ event }: { event: WorkActivityEvent }) {
   const received = new Date(receivedTime(event)!)
+  const actor = event.actor || "Unknown actor"
+  const relativeTime = formatDistanceToNow(received, { addSuffix: true })
   return (
     <Message className="items-start">
       <ActorAvatar actor={event.actor} />
       <MessageContent className="gap-1">
         <MessageHeader className="justify-between gap-3">
-          <span className="truncate">{event.actor || "Unknown actor"}</span>
-          <span className="shrink-0 font-normal">
-            {formatDistanceToNow(received, { addSuffix: true })}
-          </span>
+          <span className="truncate">{actor}</span>
+          <span className="shrink-0 font-normal">{relativeTime}</span>
         </MessageHeader>
-        <Bubble variant="outline" className="max-w-full">
-          <BubbleContent className="flex w-full flex-col border-2 bg-card shadow-md">
-            <div className="mb-2 flex justify-end">
-              <FeedItemTag itemId={event.itemId} itemTitle={event.itemTitle} />
-            </div>
-            <p className="text-muted-foreground">{event.summary}</p>
-          </BubbleContent>
-        </Bubble>
-        <MessageFooter>
-          Started {formatTaskmarkDateTime(event.started)}
+        <Dialog>
+          <DialogTrigger
+            render={
+              <button
+                type="button"
+                aria-label={`Open full worklog message from ${actor}`}
+                className="block max-w-full cursor-pointer text-left"
+              />
+            }
+          >
+            <Bubble variant="outline" className="max-w-full">
+              <BubbleContent className="w-full border-2 bg-card shadow-md transition-colors hover:bg-muted/50">
+                <p className="line-clamp-4 text-muted-foreground">
+                  {event.summary}
+                </p>
+              </BubbleContent>
+            </Bubble>
+          </DialogTrigger>
+          <DialogContent className="max-h-[min(80svh,48rem)] overflow-y-auto sm:max-w-xl">
+            <DialogHeader>
+              <div className="flex items-center gap-3 pr-8">
+                <ActorAvatar actor={event.actor} className="self-center" />
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <DialogTitle className="truncate">{actor}</DialogTitle>
+                    <FeedItemTag
+                      itemId={event.itemId}
+                      itemTitle={event.itemTitle}
+                    />
+                  </div>
+                  <time
+                    dateTime={received.toISOString()}
+                    title={received.toLocaleString()}
+                    className="text-xs font-medium text-muted-foreground"
+                  >
+                    {relativeTime}
+                  </time>
+                </div>
+              </div>
+              <DialogDescription className="whitespace-pre-wrap leading-relaxed">
+                {event.summary}
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+        <MessageFooter className="justify-between gap-3">
+          <span className="min-w-0 truncate">
+            Started {formatTaskmarkDateTime(event.started)}
+          </span>
+          <FeedItemTag itemId={event.itemId} itemTitle={event.itemTitle} />
         </MessageFooter>
       </MessageContent>
     </Message>
