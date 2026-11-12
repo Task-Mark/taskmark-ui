@@ -190,11 +190,11 @@ export function StaticBoardApp({
           ) : null}
 
           {activeView === "changelog" && changelogMarkdown ? (
-            <ChangelogPanel markdown={changelogMarkdown} />
+            <ChangelogPanel markdown={changelogMarkdown} sourcePath="CHANGELOG.md" />
           ) : null}
 
           {activeView === "reports" && hasReports ? (
-            <ReportsPanel reports={reports} />
+            <ReportsPanel reports={reports} boardRoot="" />
           ) : null}
         </div>
         {floatingChrome === false ? null : (

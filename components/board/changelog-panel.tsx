@@ -1,5 +1,6 @@
 "use client"
 
+import { MarkdownSourceProvider } from "./board-assets"
 import { MarkdownContent } from "./markdown-content"
 import {
   Card,
@@ -9,7 +10,14 @@ import {
   CardTitle,
 } from "@taskmark/components/ui/card"
 
-export function ChangelogPanel({ markdown }: { markdown: string }) {
+export function ChangelogPanel({
+  markdown,
+  sourcePath,
+}: {
+  markdown: string
+  /** CHANGELOG.md path, so relative image srcs resolve next to it. */
+  sourcePath?: string
+}) {
   return (
     <Card>
       <CardHeader>
@@ -19,7 +27,9 @@ export function ChangelogPanel({ markdown }: { markdown: string }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <MarkdownContent text={markdown} />
+        <MarkdownSourceProvider sourcePath={sourcePath}>
+          <MarkdownContent text={markdown} />
+        </MarkdownSourceProvider>
       </CardContent>
     </Card>
   )

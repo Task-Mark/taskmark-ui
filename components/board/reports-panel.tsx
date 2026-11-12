@@ -2,6 +2,7 @@
 
 import * as React from "react"
 
+import { MarkdownSourceProvider } from "./board-assets"
 import { MarkdownContent } from "./markdown-content"
 import {
   Card,
@@ -17,9 +18,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@taskmark/components/ui/select"
-import type { BoardReport } from "../../lib/board-model/report-types"
+import {
+  REPORTS_DIR_NAME,
+  type BoardReport,
+} from "../../lib/board-model/report-types"
 
-export function ReportsPanel({ reports }: { reports: BoardReport[] }) {
+export function ReportsPanel({
+  reports,
+  boardRoot,
+}: {
+  reports: BoardReport[]
+  /**
+   * Board root (absolute in live mode, "" for board-relative snapshots), so
+   * relative image srcs resolve next to `.reports/report-<date>.md`.
+   */
+  boardRoot?: string
+}) {
   const [selectedDate, setSelectedDate] = React.useState(
     reports[0]?.date ?? null
   )
@@ -65,7 +79,17 @@ export function ReportsPanel({ reports }: { reports: BoardReport[] }) {
         </div>
       </CardHeader>
       <CardContent>
-        <MarkdownContent text={selected.markdown} />
+        <MarkdownSourceProvider
+          sourcePath={
+            boardRoot == null
+              ? null
+              : [boardRoot, REPORTS_DIR_NAME, `report-${selected.id}.md`]
+                  .filter(Boolean)
+                  .join("/")
+          }
+        >
+          <MarkdownContent text={selected.markdown} />
+        </MarkdownSourceProvider>
       </CardContent>
     </Card>
   )

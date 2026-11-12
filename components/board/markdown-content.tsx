@@ -1,9 +1,10 @@
 "use client"
 
 import { Children, isValidElement, type ReactNode } from "react"
-import ReactMarkdown from "react-markdown"
+import ReactMarkdown, { defaultUrlTransform } from "react-markdown"
 import remarkGfm from "remark-gfm"
 
+import { useBoardAssetSrc } from "./board-assets"
 import { MermaidDiagram } from "./mermaid-diagram"
 import { cn } from "@taskmark/components"
 
@@ -128,6 +129,7 @@ export function MarkdownContent({
   inline = false,
   responsiveTables = false,
 }: MarkdownContentProps) {
+  const assetSrc = useBoardAssetSrc()
   const trimmed = text.trim()
   if (!trimmed) {
     if (inline) return null
@@ -137,6 +139,11 @@ export function MarkdownContent({
   const markdown = (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
+      urlTransform={(url, key, node) =>
+        defaultUrlTransform(
+          key === "src" && node.tagName === "img" ? assetSrc(url) : url
+        )
+      }
       components={
         inline
           ? {

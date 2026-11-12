@@ -25,6 +25,7 @@ import {
 import { cn } from "@taskmark/components"
 import { AttributionPeopleList } from "./attribution-avatars"
 import { DetailChildrenList } from "./detail-children-list"
+import { MarkdownSourceProvider } from "./board-assets"
 import { MarkdownContent } from "./markdown-content"
 import { useWorkItemSheet } from "./work-item-sheet"
 import { Badge } from "@taskmark/components/ui/badge"
@@ -596,9 +597,17 @@ function ItemDetailBody({ detail }: { detail: ItemDetail }) {
 }
 
 export function WorkItemDetailBody({ detail }: { detail: WorkItemDetail }) {
-  if (detail.type === "epic") return <EpicDetailBody detail={detail} />
-  if (detail.type === "story") return <StoryDetailBody detail={detail} />
-  return <ItemDetailBody detail={detail} />
+  return (
+    <MarkdownSourceProvider sourcePath={detail.filePath}>
+      {detail.type === "epic" ? (
+        <EpicDetailBody detail={detail} />
+      ) : detail.type === "story" ? (
+        <StoryDetailBody detail={detail} />
+      ) : (
+        <ItemDetailBody detail={detail} />
+      )}
+    </MarkdownSourceProvider>
+  )
 }
 
 export function WorkItemDetailHeaderBadges({

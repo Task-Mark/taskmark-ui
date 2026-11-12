@@ -30,3 +30,14 @@ export type {
   WorklogPaceDay,
   WorklogPaceIcon,
 } from "./worklog-pace"
+export {
+  BOARD_ASSET_API_PATH,
+  BOARD_ASSET_STATIC_DIR,
+  BOARD_IMAGE_TYPES,
+  boardAssetUrl,
+  boardImageType,
+  collectMarkdownImageSrcs,
+  isRelativeAssetSrc,
+  resolveBoardAssetPath,
+} from "./board-assets"
+export type { BoardAssetMode } from "./board-assets"
