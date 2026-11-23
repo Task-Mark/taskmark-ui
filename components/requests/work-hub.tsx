@@ -79,7 +79,7 @@ function RelationChip({ relation, className }: { relation: string; className?: s
     <Chip
       className={cn(
         RELATION_CLASS[relation.toLowerCase()] ?? "bg-muted text-foreground",
-        className
+        className,
       )}
     >
       {relationLabel(relation)}
@@ -111,8 +111,7 @@ function SectionTitle({ children, aside }: { children: React.ReactNode; aside?: 
 type CardTone = "selected" | "linked" | "dim" | "plain"
 
 const CARD_CLASS: Record<CardTone, string> = {
-  selected:
-    "border-black bg-primary text-primary-foreground shadow-[4px_4px_0_0_#000]",
+  selected: "border-black bg-primary text-primary-foreground shadow-[4px_4px_0_0_#000]",
   linked:
     "border-chart-2 bg-card text-card-foreground shadow-[4px_4px_0_0_var(--shadow-color)] hover:-translate-y-px",
   dim: "border-black bg-card text-card-foreground opacity-70 hover:opacity-100",
@@ -151,7 +150,7 @@ function RequestCard({
         aria-current={selected ? "page" : undefined}
         className={cn(
           "flex min-h-11 flex-col gap-2 border-2 p-3.5 text-left transition-[transform,opacity] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-          CARD_CLASS[tone]
+          CARD_CLASS[tone],
         )}
       >
         <span className="flex flex-wrap items-center gap-1.5">
@@ -161,7 +160,7 @@ function RequestCard({
               title={date.title}
               className={cn(
                 "font-mono text-[11px]",
-                selected ? "text-primary-foreground" : "text-muted-foreground"
+                selected ? "text-primary-foreground" : "text-muted-foreground",
               )}
             >
               {date.label}
@@ -171,10 +170,7 @@ function RequestCard({
         </span>
         <span className="text-[15px] leading-snug font-bold">{request.title}</span>
         <span
-          className={cn(
-            "text-xs",
-            selected ? "text-primary-foreground" : "text-muted-foreground"
-          )}
+          className={cn("text-xs", selected ? "text-primary-foreground" : "text-muted-foreground")}
         >
           {meta}
         </span>
@@ -198,10 +194,7 @@ function MeetingCard({
   const tally = tallyMeetingTasks(meeting, ctx.data.asOf)
   const requestCount = meeting.requests.length
   const meta = requestCount
-    ? [
-        plural(requestCount, "request"),
-        plural(meeting.decisions.length, "decision"),
-      ].join(" · ")
+    ? [plural(requestCount, "request"), plural(meeting.decisions.length, "decision")].join(" · ")
     : meeting.decisions.length
       ? plural(meeting.decisions.length, "decision")
       : "No product work"
@@ -214,16 +207,12 @@ function MeetingCard({
         aria-current={selected ? "page" : undefined}
         className={cn(
           "flex min-h-11 flex-col gap-2 border-2 p-3.5 text-left transition-[transform,opacity] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-          CARD_CLASS[tone]
+          CARD_CLASS[tone],
         )}
       >
         <span className="flex flex-wrap items-center gap-1.5">
           {meeting.date ? (
-            <Chip
-              className={cn(
-                selected ? "bg-black text-primary" : "bg-muted text-foreground"
-              )}
-            >
+            <Chip className={cn(selected ? "bg-black text-primary" : "bg-muted text-foreground")}>
               {ctx.day(meeting.date)}
             </Chip>
           ) : null}
@@ -231,7 +220,7 @@ function MeetingCard({
             <span
               className={cn(
                 "text-[11px]",
-                selected ? "text-primary-foreground" : "text-muted-foreground"
+                selected ? "text-primary-foreground" : "text-muted-foreground",
               )}
             >
               {duration}
@@ -241,19 +230,13 @@ function MeetingCard({
         </span>
         <span className="text-[15px] leading-snug font-bold">{meeting.title}</span>
         <span
-          className={cn(
-            "text-xs",
-            selected ? "text-primary-foreground" : "text-muted-foreground"
-          )}
+          className={cn("text-xs", selected ? "text-primary-foreground" : "text-muted-foreground")}
         >
           {meta}
         </span>
         {tally.total > 0 ? (
           <span className="flex items-center gap-2">
-            <span
-              aria-hidden
-              className="h-2.5 flex-1 border-2 border-black bg-muted"
-            >
+            <span aria-hidden className="h-2.5 flex-1 border-2 border-black bg-muted">
               <span className="block h-full bg-chart-4" style={{ width: `${pct}%` }} />
             </span>
             <span
@@ -265,7 +248,7 @@ function MeetingCard({
                     : "text-destructive"
                   : selected
                     ? "text-primary-foreground"
-                    : "text-muted-foreground"
+                    : "text-muted-foreground",
               )}
             >
               {tally.finished}/{tally.total} tasks
@@ -316,7 +299,7 @@ function LeafRow({ leaf, request }: { leaf: RequestLeaf; request: RequestDetail 
         <span
           className={cn(
             "min-w-0 flex-1 group-hover:underline",
-            finished ? "text-muted-foreground line-through decoration-1" : "text-foreground"
+            finished ? "text-muted-foreground line-through decoration-1" : "text-foreground",
           )}
         >
           {leaf.title}
@@ -466,34 +449,38 @@ function RequestSelection({ request, ctx }: { request: RequestDetail; ctx: HubCo
         )}
       </div>
 
-      <div className="flex flex-col gap-3 px-4 py-5 sm:px-6">
-        <SectionTitle>Decided in meetings</SectionTitle>
-        {decisions.length > 0 ? (
-          <ul className="flex flex-col gap-2">
-            {decisions.map((d, i) => (
-              <li
-                key={`${d.meeting.id}-${i}`}
-                className="flex flex-wrap items-start gap-x-3 gap-y-2 border-2 border-black bg-background px-3 py-2.5"
-              >
-                {d.meeting.date ? (
-                  <Chip className="bg-muted text-foreground">{ctx.day(d.meeting.date)}</Chip>
-                ) : null}
-                <span className="min-w-0 flex-[1_1_12rem] text-[13px] leading-relaxed">
-                  {d.text}
-                </span>
-                <Link
-                  href={meetingHref(d.meeting.id)}
-                  className="inline-flex min-h-11 max-w-full items-center border-2 border-black px-2.5 text-xs font-bold hover:bg-muted sm:min-h-8"
+      {ctx.data.meetings.length > 0 ? (
+        <div className="flex flex-col gap-3 px-4 py-5 sm:px-6">
+          <SectionTitle>Decided in meetings</SectionTitle>
+          {decisions.length > 0 ? (
+            <ul className="flex flex-col gap-2">
+              {decisions.map((d, i) => (
+                <li
+                  key={`${d.meeting.id}-${i}`}
+                  className="flex flex-wrap items-start gap-x-3 gap-y-2 border-2 border-black bg-background px-3 py-2.5"
                 >
-                  <span className="truncate">{d.meeting.title} →</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <EmptyNote className="text-left">No meeting decisions about this request yet.</EmptyNote>
-        )}
-      </div>
+                  {d.meeting.date ? (
+                    <Chip className="bg-muted text-foreground">{ctx.day(d.meeting.date)}</Chip>
+                  ) : null}
+                  <span className="min-w-0 flex-[1_1_12rem] text-[13px] leading-relaxed">
+                    {d.text}
+                  </span>
+                  <Link
+                    href={meetingHref(d.meeting.id)}
+                    className="inline-flex min-h-11 max-w-full items-center border-2 border-black px-2.5 text-xs font-bold hover:bg-muted sm:min-h-8"
+                  >
+                    <span className="truncate">{d.meeting.title} →</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyNote className="text-left">
+              No meeting decisions about this request yet.
+            </EmptyNote>
+          )}
+        </div>
+      ) : null}
     </>
   )
 }
@@ -509,10 +496,25 @@ const TASK_STATE: Record<
   production: { label: "In production", glyph: "✓", icon: "bg-chart-4 text-black", text: "" },
   done: { label: "Done", glyph: "✓", icon: "bg-chart-4 text-black", text: "" },
   testing: { label: "In testing", glyph: "◐", icon: "bg-chart-3 text-black", text: "" },
-  development: { label: "In development", glyph: "▶", icon: "bg-primary text-primary-foreground", text: "" },
-  overdue: { label: "Overdue", glyph: "!", icon: "bg-destructive text-destructive-foreground", text: "text-destructive" },
+  development: {
+    label: "In development",
+    glyph: "▶",
+    icon: "bg-primary text-primary-foreground",
+    text: "",
+  },
+  overdue: {
+    label: "Overdue",
+    glyph: "!",
+    icon: "bg-destructive text-destructive-foreground",
+    text: "text-destructive",
+  },
   open: { label: "Not started", glyph: "", icon: "bg-background", text: "text-muted-foreground" },
-  cancelled: { label: "Cancelled", glyph: "×", icon: "bg-muted text-muted-foreground", text: "text-muted-foreground" },
+  cancelled: {
+    label: "Cancelled",
+    glyph: "×",
+    icon: "bg-muted text-muted-foreground",
+    text: "text-muted-foreground",
+  },
 }
 
 function taskWhen(task: MeetingTask, state: MeetingTaskState, ctx: HubContext): string {
@@ -541,14 +543,14 @@ function MeetingTaskItem({
     <li
       className={cn(
         "flex flex-wrap items-start gap-x-3.5 gap-y-2.5 border-2 bg-background p-3",
-        state === "overdue" ? "border-destructive" : "border-black"
+        state === "overdue" ? "border-destructive" : "border-black",
       )}
     >
       <span
         aria-hidden
         className={cn(
           "grid size-6 shrink-0 place-items-center border-2 border-black text-[13px] font-bold",
-          s.icon
+          s.icon,
         )}
       >
         {s.glyph}
@@ -558,7 +560,7 @@ function MeetingTaskItem({
           className={cn(
             "text-sm leading-snug font-semibold",
             finished && "text-muted-foreground",
-            state === "cancelled" && "line-through"
+            state === "cancelled" && "line-through",
           )}
         >
           {task.title}
@@ -608,7 +610,10 @@ function MeetingTaskItem({
 function MeetingSelection({ meeting, ctx }: { meeting: MeetingSummary; ctx: HubContext }) {
   const tally = tallyMeetingTasks(meeting, ctx.data.asOf)
   const duration = formatDuration(meeting.durationMinutes)
-  const people = meeting.people.map((p) => p.name).filter(Boolean).join(", ")
+  const people = meeting.people
+    .map((p) => p.name)
+    .filter(Boolean)
+    .join(", ")
   const headline = [meeting.date ? ctx.day(meeting.date) : "", duration, people]
     .filter(Boolean)
     .join(" · ")
@@ -697,7 +702,9 @@ function MeetingSelection({ meeting, ctx }: { meeting: MeetingSummary; ctx: HubC
             })}
           </ul>
         ) : (
-          <EmptyNote className="text-left">No product work in this meeting. Kept for the record.</EmptyNote>
+          <EmptyNote className="text-left">
+            No product work in this meeting. Kept for the record.
+          </EmptyNote>
         )}
       </div>
 
@@ -821,10 +828,11 @@ export function WorkHub({ data, projectName, selection }: WorkHubProps) {
     return { tone: "plain", relation: "" }
   }
 
+  const hasMeetings = meetings.length > 0
   const eyebrow = [
     projectName,
     plural(data.requests.length, "request"),
-    plural(data.meetings.length, "meeting"),
+    hasMeetings ? plural(data.meetings.length, "meeting") : "",
   ]
     .filter(Boolean)
     .join(" · ")
@@ -834,10 +842,19 @@ export function WorkHub({ data, projectName, selection }: WorkHubProps) {
       <ScreenHeader
         eyebrow={eyebrow}
         title="Work"
-        description="Requests on the left, meetings on the right. Pick either one to see what links them and what is still to do."
+        description={
+          hasMeetings
+            ? "Requests on the left, meetings on the right. Pick either one to see what links them and what is still to do."
+            : "Pick a request to see what is inside it and what is still to do."
+        }
       />
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(15rem,1fr)_minmax(0,2.4fr)] xl:grid-cols-[minmax(15rem,1fr)_minmax(0,2.4fr)_minmax(14rem,1fr)]">
+      <div
+        className={cn(
+          "grid items-start gap-5 lg:grid-cols-[minmax(15rem,1fr)_minmax(0,2.4fr)]",
+          hasMeetings && "xl:grid-cols-[minmax(15rem,1fr)_minmax(0,2.4fr)_minmax(14rem,1fr)]",
+        )}
+      >
         <section aria-labelledby="work-requests" className="flex min-w-0 flex-col gap-2.5">
           <div className="flex items-baseline justify-between gap-2 px-0.5">
             <h2 id="work-requests" className="font-head text-lg">
@@ -861,7 +878,10 @@ export function WorkHub({ data, projectName, selection }: WorkHubProps) {
 
         <section
           aria-label="Selection"
-          className="flex min-w-0 flex-col border-2 border-black bg-card text-card-foreground shadow-[6px_6px_0_0_var(--primary)] lg:row-span-2 xl:row-span-1"
+          className={cn(
+            "flex min-w-0 flex-col border-2 border-black bg-card text-card-foreground shadow-[6px_6px_0_0_var(--primary)]",
+            hasMeetings && "lg:row-span-2 xl:row-span-1",
+          )}
         >
           {resolved.kind === "request" ? (
             <RequestSelection request={resolved.request} ctx={ctx} />
@@ -895,29 +915,31 @@ export function WorkHub({ data, projectName, selection }: WorkHubProps) {
           )}
         </section>
 
-        <section
-          aria-labelledby="work-meetings"
-          className="flex min-w-0 flex-col gap-2.5 lg:col-start-1 xl:col-start-auto"
-        >
-          <div className="flex items-baseline justify-between gap-2 px-0.5">
-            <h2 id="work-meetings" className="font-head text-lg">
-              Meetings
-            </h2>
-            <MonoLabel>Newest first</MonoLabel>
-          </div>
-          {meetings.length > 0 ? (
-            <ul className="flex flex-col gap-2.5">
-              {meetings.map((m) => {
-                const { tone, relation } = meetingTone(m)
-                return (
-                  <MeetingCard key={m.id} meeting={m} ctx={ctx} tone={tone} relation={relation} />
-                )
-              })}
-            </ul>
-          ) : (
-            <EmptyNote>No meetings yet.</EmptyNote>
-          )}
-        </section>
+        {hasMeetings ? (
+          <section
+            aria-labelledby="work-meetings"
+            className="flex min-w-0 flex-col gap-2.5 lg:col-start-1 xl:col-start-auto"
+          >
+            <div className="flex items-baseline justify-between gap-2 px-0.5">
+              <h2 id="work-meetings" className="font-head text-lg">
+                Meetings
+              </h2>
+              <MonoLabel>Newest first</MonoLabel>
+            </div>
+            {meetings.length > 0 ? (
+              <ul className="flex flex-col gap-2.5">
+                {meetings.map((m) => {
+                  const { tone, relation } = meetingTone(m)
+                  return (
+                    <MeetingCard key={m.id} meeting={m} ctx={ctx} tone={tone} relation={relation} />
+                  )
+                })}
+              </ul>
+            ) : (
+              <EmptyNote>No meetings yet.</EmptyNote>
+            )}
+          </section>
+        ) : null}
       </div>
     </div>
   )
