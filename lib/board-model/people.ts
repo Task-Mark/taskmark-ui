@@ -223,13 +223,14 @@ export function buildPeople(
       }
 
       // Sessions: one row per session per task; a session can span tasks.
+      // Same actor and start time is one session (as on Activity).
       for (const row of leaf.workLog) {
         const startedDay = toDay(row.started)
         if (Number.isNaN(Date.parse(row.started)) || !inPeriod(startedDay)) continue
         const minutes = minutesBetween(row.started, row.ended)
         const actor = isPersonName(row.actor) ? personKey(row.actor) : ""
-        const sessionKey = `${actor}|${row.started}|${row.ended}`
-        if (!agentSessions.has(sessionKey)) agentSessions.set(sessionKey, minutes)
+        const sessionKey = `${actor}|${row.started}`
+        agentSessions.set(sessionKey, Math.max(agentSessions.get(sessionKey) ?? 0, minutes))
         tasksTouched.add(leaf.id)
         const acc = person(row.actor)
         if (!acc) continue
