@@ -35,6 +35,8 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-backlog: var(--status-backlog);
+  --color-shipped: var(--status-shipped);
   --color-shadow-color: var(--shadow-color);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
@@ -75,6 +77,9 @@
   --chart-3: #ffdc58;
   --chart-4: #01ffcc;
   --chart-5: #5f4fe6;
+  /* Request status: backlog (ready to start) and shipped (reached main). */
+  --status-backlog: #22d3ee;
+  --status-shipped: #4ade80;
   --border-w: 2px;
   --shadow-xs: 2px 2px 0 0 var(--shadow-color);
   --shadow-sm: 3px 3px 0 0 var(--shadow-color);
@@ -114,6 +119,8 @@
   --chart-3: #ffdc58;
   --chart-4: #5eead4;
   --chart-5: #7b6df5;
+  --status-backlog: #22d3ee;
+  --status-shipped: #4ade80;
   --surface-gradient: linear-gradient(180deg, #0f0f0f 0%, #171325 100%);
   --surface-glow: radial-gradient(ellipse at top, #2f2542 0%, transparent 55%);
 }

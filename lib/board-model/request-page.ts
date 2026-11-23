@@ -269,7 +269,7 @@ export const REQUEST_GROUPS: {
   statuses: RequestStatus[]
 }[] = [
   { key: "building", title: "Being built", statuses: ["building"] },
-  { key: "ready", title: "Ready to start", statuses: ["ready"] },
+  { key: "ready", title: "Backlog", statuses: ["ready"] },
   { key: "proposed", title: "Proposed", statuses: ["proposed"] },
   { key: "shipped", title: "Shipped", statuses: ["shipped"] },
   { key: "closed", title: "Shelved and cancelled", statuses: ["shelved", "cancelled"] },

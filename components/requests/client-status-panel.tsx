@@ -225,7 +225,7 @@ function KpiRow({ status }: { status: ClientStatus }) {
         title="Left to build"
         value={Number(status.leftPoints.toFixed(1))}
         detail={`pts · ${plural(status.leftItems, "item")} · ${plural(status.openRequests, "open request")}`}
-        accent="bg-chart-4"
+        accent="bg-shipped"
         icon={
           <Icon>
             <rect x="4" y="4" width="16" height="16" />
@@ -320,7 +320,7 @@ function ForecastAside({ status }: { status: ClientStatus }) {
   const { burnup, pace, today } = status
   const hasPace = pace.pointsPerWeek > 0
   const rows: [string, string, string, number][] = [
-    ["Early", "bg-chart-4", burnup.early, pace.fastPointsPerWeek],
+    ["Early", "bg-shipped", burnup.early, pace.fastPointsPerWeek],
     ["Likely", "bg-chart-1", burnup.likely, pace.pointsPerWeek],
     ["Late", "bg-chart-2", burnup.late, pace.slowPointsPerWeek],
   ]
@@ -512,7 +512,7 @@ function ShippedColumn({ status }: { status: ClientStatus }) {
     <ColumnShell
       title="Shipped"
       count={`${status.shippedItems} on main ${status.period === "all" ? "so far" : `in ${STATUS_PERIOD_LABELS[status.period]}`}`}
-      headerClass="bg-chart-4"
+      headerClass="bg-shipped"
       labelId="client-status-shipped"
     >
       {shown.length === 0 ? (
@@ -548,7 +548,7 @@ function ShippedRow({ entry, today }: { entry: ShippedEntry; today: string }) {
     >
       <span
         aria-hidden
-        className="grid size-6 shrink-0 place-items-center border-2 border-black bg-chart-4 text-black"
+        className="grid size-6 shrink-0 place-items-center border-2 border-black bg-shipped text-black"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
           <path d="M5 12l5 5L20 7" />
@@ -559,7 +559,7 @@ function ShippedRow({ entry, today }: { entry: ShippedEntry; today: string }) {
           {entry.title}
           {entry.kind === "request" ? (
             <span className="ml-2 align-middle">
-              <Chip className="bg-chart-4 text-black">Request</Chip>
+              <Chip className="bg-shipped text-black">Request</Chip>
             </span>
           ) : null}
         </span>

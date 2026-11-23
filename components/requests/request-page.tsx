@@ -226,7 +226,7 @@ function ForecastBlock({
         {read.atRisk ? (
           <Chip className="bg-destructive text-white">At risk</Chip>
         ) : read.committed ? (
-          <Chip className="bg-chart-4 text-black">On track</Chip>
+          <Chip className="bg-shipped text-black">On track</Chip>
         ) : null}
       </div>
       <span className="font-head text-3xl leading-none">{formatDay(read.likely, asOf)}</span>
@@ -338,7 +338,7 @@ function Header({
 
 function StageLegend() {
   const items: [string, string][] = [
-    ["bg-chart-4", "Production (main)"],
+    ["bg-shipped", "Production (main)"],
     ["bg-chart-3", "Testing (quality)"],
     ["bg-primary", "Development"],
     ["bg-muted", "No commits"],
@@ -366,7 +366,7 @@ function Checklist({ items, doneLabel }: { items: { text: string; checked: boole
             aria-hidden
             className={cn(
               "mt-0.5 grid size-5 shrink-0 place-items-center border-2 border-black text-[11px] font-bold",
-              item.checked ? "bg-chart-4 text-black" : "bg-background"
+              item.checked ? "bg-shipped text-black" : "bg-background"
             )}
           >
             {item.checked ? "✓" : ""}
@@ -620,7 +620,7 @@ const LOG_KIND: Record<RequestLogKind, { label: string; className: string }> = {
   push: { label: "Push", className: "bg-primary text-primary-foreground" },
   merge: { label: "Merge", className: "bg-chart-2 text-black" },
   promote: { label: "Promote", className: "bg-chart-3 text-black" },
-  release: { label: "Release", className: "bg-chart-4 text-black" },
+  release: { label: "Release", className: "bg-shipped text-black" },
   decision: { label: "Decision", className: "bg-accent text-accent-foreground" },
   meeting: { label: "Meeting", className: "bg-chart-5 text-white" },
   scope: { label: "Scope", className: "bg-destructive text-white" },

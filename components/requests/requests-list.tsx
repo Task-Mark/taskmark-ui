@@ -339,7 +339,7 @@ function ShippedRows({
                   {day ? formatDay(day, data.asOf) : "No date"}
                 </span>
                 <span className="flex items-center gap-1.5 font-mono text-xs">
-                  <span aria-hidden className="size-3 border-2 border-black bg-chart-4" />
+                  <span aria-hidden className="size-3 border-2 border-black bg-shipped" />
                   {request.shippedLeafCount} of {request.leafCount}
                   <span className="text-muted-foreground sm:hidden">tasks</span>
                 </span>
@@ -513,7 +513,7 @@ export function RequestsList({ data, projectName }: RequestsListProps) {
               }
             />
             <StatTile value={proposed.length} swatch="bg-accent" label="proposed" />
-            <StatTile value={shipped.length} swatch="bg-chart-4" label="shipped" />
+            <StatTile value={shipped.length} swatch="bg-shipped" label="shipped" />
             <StatTile
               value={openQuestions}
               swatch="bg-chart-2"

@@ -55,7 +55,7 @@ const TASK_STATE_LABELS: Record<RoadmapTaskState, string> = {
 }
 
 const TASK_STATE_CLASS: Record<RoadmapTaskState, string> = {
-  done: "bg-chart-4 text-black",
+  done: "bg-shipped text-black",
   cancelled: "bg-muted text-muted-foreground line-through",
   overdue: "bg-destructive text-black",
   in_progress: "bg-chart-3 text-black",
@@ -159,7 +159,7 @@ function RoadmapStats({ model }: { model: RoadmapModel }) {
   const byStatus = (s: string) => open.filter((r) => r.status === s).length
   const building = byStatus("building")
   const others = [
-    byStatus("ready") ? `${byStatus("ready")} ready` : "",
+    byStatus("ready") ? `${byStatus("ready")} in backlog` : "",
     byStatus("proposed") ? `${byStatus("proposed")} proposed` : "",
     model.shipped.length ? `${model.shipped.length} shipped recently` : "",
   ].filter(Boolean)
@@ -299,7 +299,7 @@ function PaceNote({ model }: { model: RoadmapModel }) {
         {formatPoints(pace.pointsPerWeek)} points per week
       </strong>
       , the median of what reached main in the last {PACE_WEEKS} full weeks
-      {range}. Open requests queue up: building first, then ready, then proposed.
+      {range}. Open requests queue up: building first, then backlog, then proposed.
     </p>
   )
 }
@@ -440,7 +440,7 @@ function Timeline({ model }: { model: RoadmapModel }) {
         ) : null}
 
         {model.shipped.length > 0 || model.shippedEarlierCount > 0 ? (
-          <GroupHeader chip="Shipped" chipClass="bg-chart-4 text-black">
+          <GroupHeader chip="Shipped" chipClass="bg-shipped text-black">
             In main in the last 6 months
             {model.shippedEarlierCount > 0 ? (
               <>
@@ -781,7 +781,7 @@ function TaskTrack({
       <span
         className={cn(
           "absolute top-3 z-[1] size-3.5 -translate-x-1/2 border-2 border-black",
-          t.state === "done" ? "bg-chart-4" : "bg-muted",
+          t.state === "done" ? "bg-shipped" : "bg-muted",
         )}
         style={{ left: `${pos(axis, anchor)}%` }}
       />

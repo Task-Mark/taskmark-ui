@@ -12,7 +12,7 @@ import type { Stage } from "../../lib/board-model/stage"
 
 export const REQUEST_STATUS_LABELS: Record<RequestStatus, string> = {
   proposed: "Proposed",
-  ready: "Ready",
+  ready: "Backlog",
   building: "Building",
   shipped: "Shipped",
   shelved: "Shelved",
@@ -21,9 +21,9 @@ export const REQUEST_STATUS_LABELS: Record<RequestStatus, string> = {
 
 const REQUEST_STATUS_CLASS: Record<RequestStatus, string> = {
   proposed: "bg-accent text-accent-foreground",
-  ready: "bg-primary text-primary-foreground",
+  ready: "bg-backlog text-black",
   building: "bg-chart-3 text-black",
-  shipped: "bg-chart-4 text-black",
+  shipped: "bg-shipped text-black",
   shelved: "bg-muted text-muted-foreground",
   cancelled: "bg-muted text-muted-foreground line-through",
 }
@@ -44,14 +44,14 @@ export const STAGE_BRANCH: Record<Stage, string> = {
 const STAGE_CLASS: Record<Stage, string> = {
   development: "bg-primary text-primary-foreground",
   testing: "bg-chart-3 text-black",
-  production: "bg-chart-4 text-black",
+  production: "bg-shipped text-black",
 }
 
 export const STAGE_FILL: Record<Stage | "none", string> = {
   none: "bg-muted",
   development: "bg-primary",
   testing: "bg-chart-3",
-  production: "bg-chart-4",
+  production: "bg-shipped",
 }
 
 export function MonoLabel({
@@ -138,7 +138,7 @@ export function KindMark({
         ? "bg-primary text-primary-foreground"
         : kind === "bug"
           ? "bg-destructive text-destructive-foreground"
-          : "bg-chart-4 text-black"
+          : "bg-shipped text-black"
   return (
     <span
       aria-label={kind}

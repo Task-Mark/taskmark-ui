@@ -41,6 +41,7 @@ import {
   plural,
 } from "./request-ui"
 import { WorkHubMeetingTasks, type MeetingTaskRow } from "./work-hub-meeting-tasks"
+import { WorkHubRequestFilter } from "./work-hub-request-filter"
 
 export type WorkSelection = { kind: "request" | "meeting"; id: string } | null
 
@@ -65,7 +66,7 @@ const meetingHref = (id: string) =>
 const RELATION_CLASS: Record<string, string> = {
   created: "bg-chart-2 text-black",
   changed: "bg-primary text-primary-foreground",
-  accepted: "bg-chart-4 text-black",
+  accepted: "bg-shipped text-black",
   raised: "bg-chart-3 text-black",
 }
 
@@ -237,7 +238,7 @@ function MeetingCard({
         {tally.total > 0 ? (
           <span className="flex items-center gap-2">
             <span aria-hidden className="h-2.5 flex-1 border-2 border-black bg-muted">
-              <span className="block h-full bg-chart-4" style={{ width: `${pct}%` }} />
+              <span className="block h-full bg-shipped" style={{ width: `${pct}%` }} />
             </span>
             <span
               className={cn(
@@ -266,7 +267,7 @@ function MeetingCard({
 /* ------------------------------------------------------------------------ */
 
 const MARK: Record<LeafMark, { glyph: string; label: string; className: string }> = {
-  done: { glyph: "✓", label: "Done", className: "text-foreground dark:text-chart-4" },
+  done: { glyph: "✓", label: "Done", className: "text-foreground dark:text-shipped" },
   now: { glyph: "▶", label: "In progress", className: "text-chart-5 dark:text-chart-3" },
   todo: { glyph: "○", label: "To do", className: "text-muted-foreground" },
   dropped: { glyph: "×", label: "Dropped", className: "text-muted-foreground" },
@@ -493,8 +494,8 @@ const TASK_STATE: Record<
   MeetingTaskState,
   { label: string; glyph: string; icon: string; text: string }
 > = {
-  production: { label: "In production", glyph: "✓", icon: "bg-chart-4 text-black", text: "" },
-  done: { label: "Done", glyph: "✓", icon: "bg-chart-4 text-black", text: "" },
+  production: { label: "In production", glyph: "✓", icon: "bg-shipped text-black", text: "" },
+  done: { label: "Done", glyph: "✓", icon: "bg-shipped text-black", text: "" },
   testing: { label: "In testing", glyph: "◐", icon: "bg-chart-3 text-black", text: "" },
   development: {
     label: "In development",
@@ -726,7 +727,7 @@ function MeetingSelection({ meeting, ctx }: { meeting: MeetingSummary; ctx: HubC
               className="flex h-3.5 border-2 border-black bg-muted"
             >
               {donePct > 0 ? (
-                <span className="h-full bg-chart-4" style={{ width: `${donePct}%` }} />
+                <span className="h-full bg-shipped" style={{ width: `${donePct}%` }} />
               ) : null}
               {movingPct > 0 ? (
                 <span
@@ -754,7 +755,7 @@ function MeetingSelection({ meeting, ctx }: { meeting: MeetingSummary; ctx: HubC
                   key={i}
                   className="flex flex-wrap items-start gap-x-3 gap-y-2 border-2 border-black bg-background px-3 py-2.5"
                 >
-                  <span aria-hidden className="font-bold text-foreground dark:text-chart-4">
+                  <span aria-hidden className="font-bold text-foreground dark:text-shipped">
                     ✓
                   </span>
                   <span className="min-w-0 flex-[1_1_12rem] text-[13px] leading-relaxed">
@@ -863,14 +864,17 @@ export function WorkHub({ data, projectName, selection }: WorkHubProps) {
             <MonoLabel>Open first</MonoLabel>
           </div>
           {requests.length > 0 ? (
-            <ul className="flex flex-col gap-2.5">
-              {requests.map((r) => {
+            <WorkHubRequestFilter
+              rows={requests.map((r) => {
                 const { tone, relation } = requestTone(r)
-                return (
-                  <RequestCard key={r.id} request={r} ctx={ctx} tone={tone} relation={relation} />
-                )
+                return {
+                  key: r.id,
+                  status: r.status,
+                  pinned: tone === "selected",
+                  node: <RequestCard request={r} ctx={ctx} tone={tone} relation={relation} />,
+                }
               })}
-            </ul>
+            />
           ) : (
             <EmptyNote>No requests on this board yet.</EmptyNote>
           )}

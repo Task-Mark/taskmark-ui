@@ -160,7 +160,7 @@ function isClosedStatus(status: string): boolean {
 }
 
 /**
- * Forecast each open request in queue order: building first, then ready,
+ * Forecast each open request in queue order: building first, then backlog (ready),
  * then proposed; within each, by committed date (or, without one, by when the
  * request would land on its own). A request finishes when the pace has
  * covered its own remaining points plus everything queued before it.
