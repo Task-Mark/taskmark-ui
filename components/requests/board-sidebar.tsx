@@ -23,6 +23,9 @@ const ICONS = {
   requests: "M6 2h9l5 5v15H6zM14 2v6h6M9 13h8M9 17h6",
   roadmap: "M3 6h10M3 12h16M3 18h7",
   status: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 100 6 3 3 0 000-6z",
+  activity:
+    "M6 3.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM6 15.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM18 5.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM6 8.5v7M18 10.5c0 4-6 3-11 5",
+  people: "M9 4a4 4 0 100 8 4 4 0 000-8zM2 21c0-4 3-6 7-6s7 2 7 6M16 4a4 4 0 010 8M22 21c0-3-2-5-4-5.5",
   overall: "M4 5h16M8 12h12M12 19h8",
   workitems: "M4 6h16M4 12h16M4 18h16",
   worklog: "M12 7v5l3 3M12 3a9 9 0 100 18 9 9 0 000-18z",
@@ -119,7 +122,11 @@ export function BoardSidebar({
     { view: "requests", icon: ICONS.requests, badge: openRequestCount, badgeTone: "count" },
     { view: "roadmap", icon: ICONS.roadmap },
   ]
-  const reportsNav: NavItem[] = [{ view: "status", icon: ICONS.status }]
+  const reportsNav: NavItem[] = [
+    { view: "status", icon: ICONS.status },
+    { view: "activity", icon: ICONS.activity },
+    { view: "people", icon: ICONS.people },
+  ]
   const files: NavItem[] = [
     { view: "overall", icon: ICONS.overall },
     { view: "workitems", icon: ICONS.workitems },
@@ -176,7 +183,7 @@ export function BoardSidebar({
         </nav>
       </div>
 
-      <div className="mx-3.5 mt-auto flex items-center gap-2.5 border-t-2 border-muted pt-3 lg:pl-12">
+      <div className="mx-3.5 mt-auto flex flex-col gap-3 border-t-2 border-muted pt-3">
         {user ? (
           <div className="flex min-w-0 flex-1 items-center gap-2.5">
             <span
@@ -201,8 +208,10 @@ export function BoardSidebar({
             {syncNote ?? <span className="text-muted-foreground">Read from the board files</span>}
           </div>
         )}
-        <FloatingChromeToggle />
-        <ThemeToggle />
+        <div className="flex justify-end gap-2.5">
+          <FloatingChromeToggle />
+          <ThemeToggle />
+        </div>
       </div>
     </aside>
   )
@@ -222,7 +231,7 @@ export function RequestShell({
     <div className="tm-surface flex min-h-[calc(100svh-2rem)] flex-col lg:flex-row">
       {sidebar}
       <div className="flex min-w-0 flex-1 flex-col">
-        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8 sm:px-8">
+        <main className="flex w-full min-w-0 flex-1 flex-col gap-6 px-4 py-8 sm:px-8 2xl:px-10">
           {children}
         </main>
         {footer}
