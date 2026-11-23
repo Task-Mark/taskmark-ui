@@ -1,5 +1,5 @@
 import type { ContributorIdentity } from "./identity"
-import type { ChecklistItem } from "./detail-types"
+import type { ChecklistItem, CommitRow, WorkLogRow } from "./detail-types"
 import type { Stage, StageCounts } from "./stage"
 import type { DiscoveredProject } from "./types"
 
@@ -178,6 +178,10 @@ export type RequestLeaf = {
   /** When the commits reached main (written by `taskmark stages`). */
   shippedAt: string
   resolvers: ContributorIdentity[]
+  /** `## Work log` rows: one per session that worked on the task. */
+  workLog: WorkLogRow[]
+  /** `## Commits` rows. */
+  commits: CommitRow[]
 }
 
 export type RequestStory = {

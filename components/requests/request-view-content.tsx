@@ -5,6 +5,8 @@ import { RequestPage } from "./request-page"
 import { RequestsList } from "./requests-list"
 import { RoadmapPanel } from "./roadmap-panel"
 import { WorkHub, type WorkSelection } from "./work-hub"
+import { ActivityPanel } from "./activity-panel"
+import { PeoplePanel } from "./people-panel"
 
 /** Picks the request screen for a view. Shared by the live and static apps. */
 export function RequestViewContent({
@@ -36,6 +38,10 @@ export function RequestViewContent({
       return <RequestPage data={data} requestId={request ?? ""} />
     case "roadmap":
       return <RoadmapPanel data={data} projectName={projectName} />
+    case "activity":
+      return <ActivityPanel data={data} projectName={projectName} period={period ?? null} />
+    case "people":
+      return <PeoplePanel data={data} projectName={projectName} period={period ?? null} />
     case "status":
       return <ClientStatusPanel data={data} projectName={projectName} period={period ?? null} />
   }

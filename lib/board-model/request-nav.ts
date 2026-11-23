@@ -16,6 +16,8 @@ export const REQUEST_VIEWS = [
   "request",
   "roadmap",
   "status",
+  "activity",
+  "people",
 ] as const
 export type RequestView = (typeof REQUEST_VIEWS)[number]
 
@@ -27,6 +29,8 @@ export const BOARD_VIEW_LABELS: Record<BoardView, string> = {
   request: "Request",
   roadmap: "Roadmap",
   status: "Client status",
+  activity: "Activity",
+  people: "People",
   overall: "All epics",
   workitems: "All items",
   worklog: "Work log",

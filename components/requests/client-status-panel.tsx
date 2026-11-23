@@ -48,7 +48,7 @@ export function ClientStatusPanel({ data, projectName, period }: ClientStatusPan
   const { today } = status
 
   return (
-    <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-8">
+    <div className="flex w-full flex-col gap-8">
       <ScreenHeader
         eyebrow={`${projectName} · as of ${formatDay(today)}`}
         title="What's happening"
