@@ -7,6 +7,7 @@ import type {
 import type { StoryItemList } from "./item-types"
 import type { ProjectStatusMetrics } from "./project-metrics-shared"
 import type { BoardReport } from "./report-types"
+import type { RequestBoardData } from "./request-types"
 import type { SolvedCompletionSample } from "./timeframe-filters"
 import type { DiscoveredProject } from "./types"
 
@@ -37,6 +38,11 @@ export type BoardSnapshot = {
    * before the shared preference existed still load.
    */
   hideCompleted?: boolean
+  /**
+   * Requests, their trees, logs and meetings. Optional so snapshots built
+   * before request boards existed still load; null when the board has none.
+   */
+  requestBoard?: RequestBoardData | null
   /** Board-relative file path → detail (children attached) */
   detailsByPath: Record<string, WorkItemDetail>
   /** Work item id → ref for sheet open-by-id */

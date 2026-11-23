@@ -20,11 +20,18 @@ import { flattenWorklogEntries } from "../../lib/board-model/worklog"
 import type { WorkActivityEvent, WorkPresenceCard } from "../../lib/board-model/work-activity"
 import {
   LIST_VIEW_LABELS,
-  parseListViewMode,
   type ListViewMode,
 } from "../../lib/board-model/list-view-mode"
 import { seedBoardSnapshot } from "../../lib/board-model/snapshot-client"
 import type { BoardSnapshot } from "../../lib/board-model/snapshot-types"
+import {
+  BOARD_VIEW_LABELS,
+  isRequestView,
+  parseBoardView,
+} from "../../lib/board-model/request-nav"
+import { isOpenRequest } from "../../lib/board-model/request-forecast"
+import { BoardSidebar, RequestShell } from "../requests/board-sidebar"
+import { RequestViewContent } from "../requests/request-view-content"
 
 function headingForView(view: ListViewMode): string {
   if (view === "overall") return "Overall"
@@ -74,10 +81,13 @@ export function StaticBoardApp({
   const hasChangelog = changelogMarkdown != null
   const reports = snapshot.reports ?? []
   const hasReports = reports.length > 0
-  const activeView = parseListViewMode(searchParams.get("view") ?? undefined, {
+  const requestBoard = snapshot.requestBoard ?? null
+  const boardView = parseBoardView(searchParams.get("view") ?? undefined, {
     hasChangelog,
     hasReports,
+    hasRequestBoard: requestBoard != null,
   })
+  const activeView: ListViewMode = isRequestView(boardView) ? "overall" : boardView
   const selectedEpicId =
     activeView === "overall" ? searchParams.get("epic")?.trim() || null : null
   const selectedStoryId =
@@ -100,6 +110,117 @@ export function StaticBoardApp({
   const selectedEpic = selectedEpicId
     ? list.epics.find((e) => e.id === selectedEpicId) ?? null
     : null
+
+  const legacyContent = (
+    <>
+          <ProjectStatusMetricsStrip metrics={statusMetrics} />
+
+          {mobileAside ? (
+            <div className="md:hidden">{mobileAside}</div>
+          ) : (
+            <div className="md:hidden">
+              <WorklogSpeedometer entries={worklogEntries} layout="inline" />
+            </div>
+          )}
+
+          {activeView === "overall" ? (
+            <>
+              <PointsHeatmap samples={countableCompletions} />
+              <OverallTreeList
+                list={list}
+                workItemsByEpic={snapshot.workItemsByEpic}
+                itemsByStory={snapshot.itemsByStory}
+                selectedEpicId={selectedEpicId}
+                selectedStoryId={selectedStoryId}
+                countableCompletions={countableCompletions}
+                initialHideCompleted={hideCompleted}
+              />
+            </>
+          ) : null}
+
+          {activeView === "workitems" ? (
+            <WorkItemsList
+              list={workItemsList}
+              countableCompletions={countableCompletions}
+              initialHideCompleted={hideCompleted}
+            />
+          ) : null}
+
+          {activeView === "worklog" ? (
+            <WorklogPanel entries={worklogEntries} />
+          ) : null}
+
+          {activeView === "changelog" && changelogMarkdown ? (
+            <ChangelogPanel markdown={changelogMarkdown} sourcePath="CHANGELOG.md" />
+          ) : null}
+
+          {activeView === "reports" && hasReports ? (
+            <ReportsPanel reports={reports} boardRoot="" />
+          ) : null}
+    </>
+  )
+
+  const floating =
+    floatingChrome === false ? null : (
+      <BoardFloatingChrome
+        events={floatingChrome?.events}
+        eventsReady={floatingChrome?.eventsReady}
+        presence={floatingChrome?.presence}
+        presenceReady={floatingChrome?.presenceReady}
+        worklogEntries={worklogEntries}
+      />
+    )
+
+  if (requestBoard) {
+    return (
+      <WorkItemSheetProvider>
+        <RequestShell
+          sidebar={
+            <BoardSidebar
+              activeView={boardView}
+              projectName={activeProject.name}
+              projectMeta={`${requestBoard.requests.length} requests · ${requestBoard.meetings.length} meetings`}
+              projectSlot={actions}
+              openRequestCount={requestBoard.requests.filter(isOpenRequest).length}
+              openMeetingTaskCount={requestBoard.meetings.reduce(
+                (n, m) =>
+                  n +
+                  m.tasks.filter((t) => t.status === "open" || t.status === "in_progress")
+                    .length,
+                0
+              )}
+              hasChangelog={hasChangelog}
+              hasReports={hasReports}
+            />
+          }
+        >
+          {isRequestView(boardView) ? (
+            <RequestViewContent
+              view={boardView}
+              data={requestBoard}
+              projectName={activeProject.name}
+              request={searchParams.get("request")}
+              meeting={searchParams.get("meeting")}
+              period={searchParams.get("period")}
+            />
+          ) : (
+            <>
+              <div>
+                <h1 className="font-head text-3xl tracking-tight">
+                  {BOARD_VIEW_LABELS[activeView]}
+                </h1>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {activeProject.name} · the board files as they are, epic by epic
+                </p>
+              </div>
+              {legacyContent}
+            </>
+          )}
+        </RequestShell>
+        {floating}
+      </WorkItemSheetProvider>
+    )
+  }
 
   return (
     <WorkItemSheetProvider>
@@ -152,60 +273,9 @@ export function StaticBoardApp({
             />
           </div>
 
-          <ProjectStatusMetricsStrip metrics={statusMetrics} />
-
-          {mobileAside ? (
-            <div className="md:hidden">{mobileAside}</div>
-          ) : (
-            <div className="md:hidden">
-              <WorklogSpeedometer entries={worklogEntries} layout="inline" />
-            </div>
-          )}
-
-          {activeView === "overall" ? (
-            <>
-              <PointsHeatmap samples={countableCompletions} />
-              <OverallTreeList
-                list={list}
-                workItemsByEpic={snapshot.workItemsByEpic}
-                itemsByStory={snapshot.itemsByStory}
-                selectedEpicId={selectedEpicId}
-                selectedStoryId={selectedStoryId}
-                countableCompletions={countableCompletions}
-                initialHideCompleted={hideCompleted}
-              />
-            </>
-          ) : null}
-
-          {activeView === "workitems" ? (
-            <WorkItemsList
-              list={workItemsList}
-              countableCompletions={countableCompletions}
-              initialHideCompleted={hideCompleted}
-            />
-          ) : null}
-
-          {activeView === "worklog" ? (
-            <WorklogPanel entries={worklogEntries} />
-          ) : null}
-
-          {activeView === "changelog" && changelogMarkdown ? (
-            <ChangelogPanel markdown={changelogMarkdown} sourcePath="CHANGELOG.md" />
-          ) : null}
-
-          {activeView === "reports" && hasReports ? (
-            <ReportsPanel reports={reports} boardRoot="" />
-          ) : null}
+          {legacyContent}
         </div>
-        {floatingChrome === false ? null : (
-          <BoardFloatingChrome
-            events={floatingChrome?.events}
-            eventsReady={floatingChrome?.eventsReady}
-            presence={floatingChrome?.presence}
-            presenceReady={floatingChrome?.presenceReady}
-            worklogEntries={worklogEntries}
-          />
-        )}
+        {floating}
       </div>
     </WorkItemSheetProvider>
   )

@@ -42,7 +42,8 @@
     "./board-model/worklog": "./lib/board-model/worklog.ts",
     "./theme": "./lib/theme.ts",
     "./theme.css": "./styles/theme.css",
-    "./style": "./styles/theme.css"
+    "./style": "./styles/theme.css",
+    "./requests": "./components/requests/index.ts"
   },
   "peerDependencies": {
     "next": ">=15",
