@@ -24,6 +24,7 @@ import {
 } from "../../lib/board-model/list-view-mode"
 import { seedBoardSnapshot } from "../../lib/board-model/snapshot-client"
 import type { BoardSnapshot } from "../../lib/board-model/snapshot-types"
+import type { ContributorIdentity } from "../../lib/board-model/identity"
 import {
   BOARD_VIEW_LABELS,
   isRequestView,
@@ -46,6 +47,7 @@ export function StaticBoardApp({
   floatingChrome,
   title = "Taskmark",
   tagline = "Product memory for agent work",
+  user,
 }: {
   snapshot: BoardSnapshot
   actions?: React.ReactNode
@@ -68,6 +70,8 @@ export function StaticBoardApp({
       }
   title?: string
   tagline?: string
+  /** Shown at the bottom of the request board sidebar (e.g. the Cloud's signed-in user). */
+  user?: ContributorIdentity | null
 }) {
   React.useMemo(() => {
     seedBoardSnapshot(snapshot)
@@ -183,6 +187,7 @@ export function StaticBoardApp({
               projectSlot={actions}
               brandTitle={title}
               brandTagline={tagline}
+              user={user}
               openRequestCount={requestBoard.requests.filter(isOpenRequest).length}
               openMeetingTaskCount={requestBoard.meetings.reduce(
                 (n, m) =>

@@ -8,6 +8,7 @@ import { BOARD_VIEW_LABELS, boardViewHref, type BoardView } from "../../lib/boar
 import { ThemeToggle } from "../theme-toggle"
 import { BrandBlock } from "../board/brand-block"
 import { FloatingChromeToggle } from "../board/floating-chrome-toggle"
+import type { ContributorIdentity } from "../../lib/board-model/identity"
 import { MonoLabel } from "./request-ui"
 
 type NavItem = {
@@ -43,6 +44,8 @@ export type BoardSidebarProps = {
   hasReports?: boolean
   /** Footer line, e.g. "Synced 2 min ago". */
   syncNote?: React.ReactNode
+  /** Who is looking at the board (git user locally, signed-in user in the Cloud). */
+  user?: ContributorIdentity | null
   /** Brand name and tagline, as in the app bar (the Cloud passes its own). */
   brandTitle?: string
   brandTagline?: string
@@ -105,6 +108,7 @@ export function BoardSidebar({
   hasChangelog,
   hasReports,
   syncNote,
+  user,
   brandTitle = "Taskmark",
   brandTagline = "Product memory for agent work",
   className,
@@ -173,9 +177,30 @@ export function BoardSidebar({
       </div>
 
       <div className="mx-3.5 mt-auto flex items-center gap-2.5 border-t-2 border-muted pt-3 lg:pl-12">
-        <div className="flex min-w-0 flex-1 flex-col text-xs">
-          {syncNote ?? <span className="text-muted-foreground">Read from the board files</span>}
-        </div>
+        {user ? (
+          <div className="flex min-w-0 flex-1 items-center gap-2.5">
+            <span
+              aria-hidden
+              className="grid size-7.5 shrink-0 place-items-center border-2 border-black bg-chart-4 text-[10px] font-bold text-black"
+            >
+              {user.initials || user.name.slice(0, 2).toUpperCase()}
+            </span>
+            <span className="flex min-w-0 flex-col text-xs">
+              <span className="truncate font-bold" title={user.email || undefined}>
+                {user.name}
+              </span>
+              {syncNote ? (
+                <span className="truncate text-muted-foreground">{syncNote}</span>
+              ) : user.email ? (
+                <span className="truncate text-muted-foreground">{user.email}</span>
+              ) : null}
+            </span>
+          </div>
+        ) : (
+          <div className="flex min-w-0 flex-1 flex-col text-xs">
+            {syncNote ?? <span className="text-muted-foreground">Read from the board files</span>}
+          </div>
+        )}
         <FloatingChromeToggle />
         <ThemeToggle />
       </div>
