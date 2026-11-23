@@ -181,6 +181,8 @@ export function StaticBoardApp({
               projectName={activeProject.name}
               projectMeta={`${requestBoard.requests.length} requests${requestBoard.meetings.length > 0 ? ` · ${requestBoard.meetings.length} meetings` : ""}`}
               projectSlot={actions}
+              brandTitle={title}
+              brandTagline={tagline}
               openRequestCount={requestBoard.requests.filter(isOpenRequest).length}
               openMeetingTaskCount={requestBoard.meetings.reduce(
                 (n, m) =>

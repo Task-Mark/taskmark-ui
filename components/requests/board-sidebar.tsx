@@ -10,6 +10,7 @@ import {
   type BoardView,
 } from "../../lib/board-model/request-nav"
 import { ThemeToggle } from "../theme-toggle"
+import { BrandBlock } from "../board/brand-block"
 import { MonoLabel } from "./request-ui"
 
 type NavItem = {
@@ -46,6 +47,9 @@ export type BoardSidebarProps = {
   hasReports?: boolean
   /** Footer line, e.g. "Synced 2 min ago". */
   syncNote?: React.ReactNode
+  /** Brand name and tagline, as in the app bar (the Cloud passes its own). */
+  brandTitle?: string
+  brandTagline?: string
   className?: string
 }
 
@@ -105,6 +109,8 @@ export function BoardSidebar({
   hasChangelog,
   hasReports,
   syncNote,
+  brandTitle = "Taskmark",
+  brandTagline = "Product memory for agent work",
   className,
 }: BoardSidebarProps) {
   const activeKey: BoardView = activeView === "request" ? "requests" : activeView
@@ -126,18 +132,16 @@ export function BoardSidebar({
     <aside
       aria-label="Main"
       className={cn(
-        "flex flex-col gap-4 border-black bg-card px-3.5 pt-4.5 pb-5 text-card-foreground lg:sticky lg:top-0 lg:h-[calc(100svh-2rem)] lg:w-64 lg:shrink-0 lg:overflow-y-auto lg:border-r-2",
+        "flex flex-col gap-4 border-black bg-card px-3.5 pt-4.5 pb-5 text-card-foreground lg:sticky lg:top-0 lg:h-[calc(100svh-2rem)] lg:w-72 lg:shrink-0 lg:overflow-y-auto lg:border-r-2",
         className
       )}
     >
       <Link
         href={boardViewHref({ view: "work", hasRequestBoard: true })}
-        className="flex min-h-11 items-center gap-2.5"
+        aria-label={`${brandTitle}, go to Work`}
+        className="min-h-11"
       >
-        <span className="grid size-9.5 place-items-center border-2 border-black bg-chart-2 font-head text-sm text-black shadow-[3px_3px_0_0_#000]">
-          TM
-        </span>
-        <span className="font-head text-xl">Taskmark</span>
+        <BrandBlock title={brandTitle} tagline={brandTagline} />
       </Link>
 
       <div className="flex min-h-13 items-center gap-2.5 border-2 border-black bg-background px-2.5 py-2 shadow-[3px_3px_0_0_var(--shadow-color)]">
